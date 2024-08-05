@@ -5,6 +5,7 @@ import os
 from .chunk import ChunkID, PositionType, PositionFileRange
 from typing import List, Tuple
 
+
 class ChunkTracker:
     def __init__(self, root_dir: str):
         if not os.path.exists(root_dir):
@@ -30,7 +31,7 @@ class ChunkTracker:
         self.conn.commit()
 
     def add_position(
-        self, chunk_id: ChunkID, position: str, position_type: PositionType
+            self, chunk_id: ChunkID, position: str, position_type: PositionType
     ):
         logging.debug(f"add chunk position: {chunk_id}, {position}, {position_type}")
 

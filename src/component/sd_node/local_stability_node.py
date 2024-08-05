@@ -9,7 +9,8 @@ import requests
 from typing import Tuple
 from pathlib import Path
 
-from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType,ComputeTaskResultCode,ComputeNode,AIStorage,UserConfig
+from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType, ComputeTaskResultCode, ComputeNode, \
+    AIStorage, UserConfig
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ class Local_Stability_ComputeNode(ComputeNode):
         self.output_dir = None
 
         self.task_queue = Queue()
-    
+
     async def initial(self):
         if os.getenv("LOCAL_STABILITY_URL") is not None:
             self.url = os.getenv("LOCAL_STABILITY_URL")
@@ -62,7 +63,7 @@ class Local_Stability_ComputeNode(ComputeNode):
         else:
             self.output_dir = AIStorage.get_instance(
             ).get_user_config().get_value("text2img_output_dir")
-        
+
         if os.getenv("TEXT2IMG_DEFAULT_MODEL") is not None:
             self.default_model = os.getenv("TEXT2IMG_DEFAULT_MODEL")
         else:
@@ -79,7 +80,7 @@ class Local_Stability_ComputeNode(ComputeNode):
 
         if self.output_dir is None:
             self.output_dir = "./"
-        
+
         self.output_dir = os.path.abspath(self.output_dir)
 
         self.start()
@@ -102,13 +103,12 @@ class Local_Stability_ComputeNode(ComputeNode):
         except Exception as e:
             return f"{e}", None
 
-
     def _run_task(self, task: ComputeTask):
         task.state = ComputeTaskState.RUNNING
         result = ComputeTaskResult()
         result.result_code = ComputeTaskResultCode.ERROR
         result.set_from_task(task)
-        
+
         model_name = task.params["model_name"]
         prompt = task.params["prompt"]
         negative_prompt = task.params["negative_prompt"]
@@ -149,7 +149,7 @@ class Local_Stability_ComputeNode(ComputeNode):
             task.error_str = err_msg
             result.error_str = err_msg
             return result
-        
+
         r = resp.json()
 
         for i in r['images']:

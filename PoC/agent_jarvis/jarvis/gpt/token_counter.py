@@ -8,7 +8,7 @@ import tiktoken_async
 
 
 async def count_message_tokens(
-        messages: List[dict], model: str = "gpt-3.5-turbo-0301"
+        messages: List[dict], model: str = "gpt-4o-mini"
 ) -> int:
     """
     Returns the number of tokens used by a list of messages.
@@ -27,15 +27,15 @@ async def count_message_tokens(
     except KeyError:
         print("Warning: model not found. Using cl100k_base encoding.")
         encoding = await tiktoken_async.get_encoding("cl100k_base")
-    if model == "gpt-3.5-turbo":
+    if model == "gpt-4o-mini":
         # !Note: gpt-3.5-turbo may change over time.
         # Returning num tokens assuming Mgpt-3.5-turbo-0301.")
-        return await count_message_tokens(messages, model="gpt-3.5-turbo-0301")
+        return await count_message_tokens(messages, model="gpt-4o-mini")
     elif model == "gpt-4":
         # !Note: gpt-4 may change over time. Returning num tokens assuming gpt-4-0314.")
         return await count_message_tokens(messages, model="gpt-4-0314")
     # TODO: OpenAI has not mention how to count tokens for 0613, thus, we use the former method
-    elif model == "gpt-3.5-turbo-0301" or model == "gpt-3.5-turbo-0613" or model == "gpt-3.5-turbo-16k-0613":
+    elif model == "gpt-4o-mini" or model == "gpt-4o-mini" or model == "gpt-4o-mini":
         tokens_per_message = (
             4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
         )

@@ -68,11 +68,11 @@ class EmailObjectBuilder:
         return self
 
     def build(self, store) -> EmailObject:
-        
+
         # Just get the object store and relation store from global KnowledgeStore
         store = store.get_object_store()
         relation = store.get_relation_store()
-        
+
         # Read meta.json
         meta = {}
         meta_file = os.path.join(self.folder, "meta.json")
@@ -139,7 +139,7 @@ class EmailObjectBuilder:
         # Create RichTextObject
         rich_text = RichTextObject(images, videos, documents)
         rich_text_id = rich_text.calculate_id()
-        
+
         # build relations with rich_text
         for image_id in images.values():
             relation.add_relation(image_id, rich_text_id)
@@ -147,13 +147,13 @@ class EmailObjectBuilder:
             relation.add_relation(video_id, rich_text_id)
         for document_id in documents.values():
             relation.add_relation(document_id, rich_text_id)
-            
+
         # Create EmailObject
         email_object = EmailObject(meta, {}, rich_text)
         email_object_id = email_object.calculate_id()
         store.put_object(email_object_id, email_object.encode())
-        
+
         # build relations with email_object
         relation.add_relation(rich_text_id, email_object_id)
-        
+
         return email_object

@@ -14,7 +14,7 @@ import sys
 
 from ..proto.agent_msg import AgentMsg
 from ..proto.ai_function import *
-from ..proto.agent_task import AgentTaskState,AgentTask,AgentTodo, AgentTodoState
+from ..proto.agent_task import AgentTaskState, AgentTask, AgentTodo, AgentTodoState
 from ..proto.compute_task import *
 
 from .agent_base import *
@@ -27,27 +27,27 @@ from ..environment.workspace_env import WorkspaceEnvironment, TodoListType
 from ..environment.environment import *
 from ..storage.storage import AIStorage
 from ..knowledge import *
-from ..proto.compute_task import LLMPrompt,LLMResult
+from ..proto.compute_task import LLMPrompt, LLMResult
 
 logger = logging.getLogger(__name__)
 
 
 class AIAgent(BaseAIAgent):
     def __init__(self) -> None:
-        self.role_prompt:LLMPrompt = None
-        self.agent_prompt:LLMPrompt = None
-        self.agent_think_prompt:LLMPrompt = None
-        self.llm_model_name:str = None
-        self.max_token_size:int = 128000
+        self.role_prompt: LLMPrompt = None
+        self.agent_prompt: LLMPrompt = None
+        self.agent_think_prompt: LLMPrompt = None
+        self.llm_model_name: str = None
+        self.max_token_size: int = 128000
         self.agent_energy = 15
         self.agent_task = None
         self.last_recover_time = time.time()
         self.enable_thread = False
         self.can_do_unassigned_task = True
 
-        self.agent_id:str = None
-        self.template_id:str = None
-        self.fullname:str = None
+        self.agent_id: str = None
+        self.template_id: str = None
+        self.fullname: str = None
         self.powerby = None
         self.enable = True
         self.enable_kb = False
@@ -59,19 +59,19 @@ class AIAgent(BaseAIAgent):
         self.read_report_prompt = None
 
         self.base_dir = None
-        #self.memory_db = None
-        self.unread_msg = Queue() # msg from other agent
+        # self.memory_db = None
+        self.unread_msg = Queue()  # msg from other agent
         self.owenr_bus = None
 
-        self.memory : AgentMemory = None
-        self.prviate_workspace : AgentWorkspace = None
+        self.memory: AgentMemory = None
+        self.prviate_workspace: AgentWorkspace = None
 
-        self.behaviors:Dict[str,BaseLLMProcess] = {}
+        self.behaviors: Dict[str, BaseLLMProcess] = {}
 
-    async def initial(self,params:Dict = None):
+    async def initial(self, params: Dict = None):
         self.base_dir = f"{AIStorage.get_instance().get_myai_dir()}/agent_data/{self.agent_id}"
         memory_base_dir = f"{self.base_dir}/memory"
-        self.memory = AgentMemory(self.agent_id,memory_base_dir)
+        self.memory = AgentMemory(self.agent_id, memory_base_dir)
         self.prviate_workspace = AgentWorkspace(self.agent_id)
         init_params = {}
         init_params["memory"] = self.memory
@@ -85,7 +85,7 @@ class AIAgent(BaseAIAgent):
         self.wake_up()
         return True
 
-    async def load_from_config(self,config:dict) -> bool:
+    async def load_from_config(self, config: dict) -> bool:
         if config.get("instance_id") is None:
             logger.error("agent instance_id is None!")
             return False
@@ -116,7 +116,7 @@ class AIAgent(BaseAIAgent):
         if config.get("history_len"):
             self.history_len = int(config.get("history_len"))
 
-        #load all LLMProcess
+        # load all LLMProcess
         self.behaviors = {}
         behaviors = config.get("behavior")
         for process_config_name in behaviors.keys():
@@ -163,61 +163,61 @@ class AIAgent(BaseAIAgent):
 
         return context_info
 
-    async def llm_process_msg(self,msg:AgentMsg) -> AgentMsg:
-        need_process:bool = True
+    async def llm_process_msg(self, msg: AgentMsg) -> AgentMsg:
+        need_process: bool = True
         if msg.msg_type == AgentMsgType.TYPE_GROUPMSG:
             need_process = False
 
             session_topic = msg.target + "#" + msg.topic
-            chatsession = AIChatSession.get_session(self.agent_id,session_topic,self.memory.memory_db)
+            chatsession = AIChatSession.get_session(self.agent_id, session_topic, self.memory.memory_db)
             if msg.mentions is not None:
                 if self.agent_id in msg.mentions:
                     need_process = True
-                    logger.info(f"agent {self.agent_id} recv a group chat message from {msg.sender},but is not mentioned,ignore!")
+                    logger.info(
+                        f"agent {self.agent_id} recv a group chat message from {msg.sender},but is not mentioned,ignore!")
 
             if need_process is not True:
                 chatsession.append(msg)
-                resp_msg = msg.create_group_resp_msg(self.agent_id,"")
+                resp_msg = msg.create_group_resp_msg(self.agent_id, "")
                 return resp_msg
 
         context_info = await self._get_context_info()
         input_parms = {
-            "msg":msg,
-            "context_info":context_info
+            "msg": msg,
+            "context_info": context_info
         }
         msg_process = self.behaviors.get("on_message")
-        llm_result : LLMResult = await msg_process.process(input_parms)
+        llm_result: LLMResult = await msg_process.process(input_parms)
         if llm_result.state == LLMResultStates.ERROR:
             error_resp = msg.create_error_resp(llm_result.error_str)
             return error_resp
         elif llm_result.state == LLMResultStates.IGNORE:
             return None
-        else: # OK
+        else:  # OK
             if llm_result.raw_result is not None:
                 resp_msg = llm_result.raw_result.get("_resp_msg")
                 return resp_msg
             else:
                 return msg.create_resp_msg(llm_result.resp)
 
-    async def _process_msg(self,msg:AgentMsg,workspace = None) -> AgentMsg:
+    async def _process_msg(self, msg: AgentMsg, workspace=None) -> AgentMsg:
         return await self.llm_process_msg(msg)
 
-
     async def llm_self_think(self):
-        llm_process : BaseLLMProcess = self.behaviors.get("self_thinking")
+        llm_process: BaseLLMProcess = self.behaviors.get("self_thinking")
         if llm_process:
             logger.info(f"agent {self.agent_id} self thinking start!")
 
             context_info = await self._get_context_info()
-            #chat_history = AIChatSession.list_session(self.agent_id,self.memory.memory_db)
-            #known_experience_list = await self.memory.list_experience()
-            #record_list = await self.memory.load_records(await self.memory.get_last_think_time())
+            # chat_history = AIChatSession.list_session(self.agent_id,self.memory.memory_db)
+            # known_experience_list = await self.memory.list_experience()
+            # record_list = await self.memory.load_records(await self.memory.get_last_think_time())
 
             input_parms = {
-                "context_info":context_info
+                "context_info": context_info
             }
 
-            llm_result : LLMResult = await llm_process.process(input_parms)
+            llm_result: LLMResult = await llm_process.process(input_parms)
             if llm_result.state == LLMResultStates.ERROR:
                 logger.error(f"llm process self thinking error:{llm_result.compute_error_str}")
             elif llm_result.state == LLMResultStates.IGNORE:
@@ -229,26 +229,25 @@ class AIAgent(BaseAIAgent):
             return
 
     async def llm_triage_tasklist(self):
-        llm_process : BaseLLMProcess = self.behaviors.get("triage_tasks")
+        llm_process: BaseLLMProcess = self.behaviors.get("triage_tasks")
         if llm_process:
             if self.prviate_workspace:
                 filter = {}
                 filter["state"] = AgentTaskState.TASK_STATE_WAIT
 
-                tasklist:List[AgentTask]= await self.prviate_workspace.task_mgr.list_task(filter)
-
+                tasklist: List[AgentTask] = await self.prviate_workspace.task_mgr.list_task(filter)
 
                 if tasklist:
                     if len(tasklist) > 0:
-                        simple_list:List[Dict] = []
+                        simple_list: List[Dict] = []
                         for task in tasklist:
                             simple_list.append(task.to_simple_dict())
 
                         input_parms = {
-                            "tasklist":simple_list,
+                            "tasklist": simple_list,
                             "context_info": await self._get_context_info()
                         }
-                        llm_result : LLMResult = await llm_process.process(input_parms)
+                        llm_result: LLMResult = await llm_process.process(input_parms)
                         if llm_result.state == LLMResultStates.ERROR:
                             logger.error(f"llm process triage_tasks error:{llm_result.compute_error_str}")
                         elif llm_result.state == LLMResultStates.IGNORE:
@@ -278,14 +277,14 @@ class AIAgent(BaseAIAgent):
                     #         self.agent_energy -= 1
 
     async def llm_do_todo(self, todo: AgentTodo):
-        llm_process : BaseLLMProcess = self.behaviors.get("do")
+        llm_process: BaseLLMProcess = self.behaviors.get("do")
         logger.info(f"agent {self.agent_id} DO todo {todo.todo_path} start!")
         if llm_process:
             input_parms = {
-                "todo":todo,
+                "todo": todo,
                 "context_info": await self._get_context_info()
             }
-            llm_result : LLMResult = await llm_process.process(input_parms)
+            llm_result: LLMResult = await llm_process.process(input_parms)
             if llm_result.state == LLMResultStates.ERROR:
                 logger.error(f"llm process do_todo error:{llm_result.compute_error_str}")
             elif llm_result.state == LLMResultStates.IGNORE:
@@ -295,14 +294,14 @@ class AIAgent(BaseAIAgent):
             self.agent_energy -= 1
 
     async def llm_check_todo(self, todo: AgentTodo):
-        llm_process : BaseLLMProcess = self.behaviors.get("check")
+        llm_process: BaseLLMProcess = self.behaviors.get("check")
         logger.info(f"agent {self.agent_id} CHECK todo {todo.todo_path} start!")
         if llm_process:
             input_parms = {
-                "todo":todo,
+                "todo": todo,
                 "context_info": await self._get_context_info()
             }
-            llm_result : LLMResult = await llm_process.process(input_parms)
+            llm_result: LLMResult = await llm_process.process(input_parms)
             if llm_result.state == LLMResultStates.ERROR:
                 logger.error(f"llm process check_todo error:{llm_result.compute_error_str}")
             elif llm_result.state == LLMResultStates.IGNORE:
@@ -313,15 +312,15 @@ class AIAgent(BaseAIAgent):
 
             return
 
-    async def llm_plan_task(self,task:AgentTask):
-        llm_process : BaseLLMProcess = self.behaviors.get("plan_task")
+    async def llm_plan_task(self, task: AgentTask):
+        llm_process: BaseLLMProcess = self.behaviors.get("plan_task")
         logger.info(f"agent {self.agent_id} PLAN task {task.task_path} start!")
         if llm_process:
             input_parms = {
-                "task":task,
+                "task": task,
                 "context_info": await self._get_context_info()
             }
-            llm_result : LLMResult = await llm_process.process(input_parms)
+            llm_result: LLMResult = await llm_process.process(input_parms)
             if llm_result.state == LLMResultStates.ERROR:
                 logger.error(f"llm process plan_task error:{llm_result.compute_error_str}")
             elif llm_result.state == LLMResultStates.IGNORE:
@@ -330,15 +329,15 @@ class AIAgent(BaseAIAgent):
                 logger.info(f"llm process plan_task ok!,think is:{llm_result.resp}")
             self.agent_energy -= 1
 
-    async def llm_review_task(self,task:AgentTask):
-        llm_process : BaseLLMProcess = self.behaviors.get("review_task")
+    async def llm_review_task(self, task: AgentTask):
+        llm_process: BaseLLMProcess = self.behaviors.get("review_task")
         logger.info(f"agent {self.agent_id} REVIEW task {task.task_path} start!")
         if llm_process:
             input_parms = {
-                "task":task,
+                "task": task,
                 "context_info": await self._get_context_info()
             }
-            llm_result : LLMResult = await llm_process.process(input_parms)
+            llm_result: LLMResult = await llm_process.process(input_parms)
             if llm_result.state == LLMResultStates.ERROR:
                 logger.error(f"llm process review_task error:{llm_result.compute_error_str}")
             elif llm_result.state == LLMResultStates.IGNORE:
@@ -346,7 +345,6 @@ class AIAgent(BaseAIAgent):
             else:
                 logger.info(f"llm process review_task ok!,think is:{llm_result.resp}")
             self.agent_energy -= 1
-
 
     async def _self_imporve(self):
         await self.llm_self_think()
@@ -376,10 +374,10 @@ class AIAgent(BaseAIAgent):
 
                 await self.llm_triage_tasklist()
                 # Get un finished tasks
-                #filter = {}
-                #filter["state"] = AgentTaskState.TASK_STATE_WAIT
+                # filter = {}
+                # filter["state"] = AgentTaskState.TASK_STATE_WAIT
                 filter = None
-                task_list:List[AgentTask] = await self.prviate_workspace.task_mgr.list_task(filter)
+                task_list: List[AgentTask] = await self.prviate_workspace.task_mgr.list_task(filter)
 
                 for task in task_list:
                     if self.agent_energy <= 0:
@@ -428,10 +426,3 @@ class AIAgent(BaseAIAgent):
 
             # Because the LLM itself is very slow, the accuracy of the system processing task is in minutes.
             await asyncio.sleep(30)
-
-
-
-
-
-
-

@@ -12,6 +12,7 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+
 # class AgentTodoResult:
 #     TODO_RESULT_CODE_OK = 0,
 #     TODO_RESULT_CODE_LLM_ERROR = 1,
@@ -187,11 +188,11 @@ logger = logging.getLogger(__name__)
 
 #         logger.info(f"todo {self.title} can do.")
 #         return True
-    
+
 ############################################################################################
 class AgentTaskState(Enum):
-    TASK_STATE_WAIT= "wait_assign"
-    TASK_STATE_ASSIGNED  = "assigned"
+    TASK_STATE_WAIT = "wait_assign"
+    TASK_STATE_ASSIGNED = "assigned"
     TASK_STATE_CONFIRMED = "confirmed"
 
     TASK_STATE_CANCEL = "cancel"
@@ -202,18 +203,20 @@ class AgentTaskState(Enum):
     TASK_STATE_CHECKFAILED = "check_failed"
     TASK_STATE_DONE = "done"
     TASK_STATE_FAILED = "failed"
+
     @staticmethod
     def from_str(value):
         return next((s for s in AgentTaskState.__members__.values() if s.value == value), None)
 
+
 class AgentTodoState(Enum):
     TODO_STATE_WAITING = "waiting"
-    #TODO_STATE_WORKING = "working"
-    
+    # TODO_STATE_WORKING = "working"
+
     TODO_STATE_EXEC_OK = "execute_ok"
     TODO_STATE_EXEC_FAILED = "execute_failed"
 
-    TODO_STATE_CHECK_FAILED = "check_failed" 
+    TODO_STATE_CHECK_FAILED = "check_failed"
     TODO_STATE_DONE = "done"
     TODO_STATE_FAILED = "failed"
 
@@ -221,16 +224,17 @@ class AgentTodoState(Enum):
     def from_str(value):
         return next((s for s in AgentTodoState.__members__.values() if s.value == value), None)
 
+
 class AgentTodo:
     def __init__(self) -> None:
         self.todo_id = "todo#" + uuid.uuid4().hex
-        self.todo_path : str = None
+        self.todo_path: str = None
         self.owner_taskid = None
-        self.title:str = None
-        self.detail:str = None
+        self.title: str = None
+        self.detail: str = None
         self.state = AgentTodoState.TODO_STATE_WAITING
         self.category = None
-        self.step_order:int = 0
+        self.step_order: int = 0
 
     def to_dict(self) -> dict:
         result = {}
@@ -245,42 +249,42 @@ class AgentTodo:
         return result
 
     @classmethod
-    def from_dict(cls,json_obj:dict) -> 'AgentTodo':
+    def from_dict(cls, json_obj: dict) -> 'AgentTodo':
         result_obj = AgentTodo()
-        #todo_id
+        # todo_id
         if json_obj.get("todo_id") is not None:
             result_obj.todo_id = json_obj.get("todo_id")
-        #owner_taskid
+        # owner_taskid
         if json_obj.get("owner_taskid") is not None:
             result_obj.owner_taskid = json_obj.get("owner_taskid")
-        #name
+        # name
         if json_obj.get("title") is not None:
             result_obj.title = json_obj.get("title")
-        #detail
+        # detail
         if json_obj.get("detail") is not None:
             result_obj.detail = json_obj.get("detail")
-        #state
+        # state
         if json_obj.get("state") is not None:
             result_obj.state = AgentTodoState.from_str(json_obj.get("state"))
-        #category
+        # category
         if json_obj.get("category") is not None:
             result_obj.category = json_obj.get("category")
-        #step_order
+        # step_order
         if json_obj.get("step_order") is not None:
             result_obj.step_order = json_obj.get("step_order")
 
         return result_obj
-          
+
 
 class AgentTask:
     def __init__(self) -> None:
-        self.task_id : str = "task#" + uuid.uuid4().hex
-        self.task_path : str = None # get parent todo,sub todo by path
+        self.task_id: str = "task#" + uuid.uuid4().hex
+        self.task_path: str = None  # get parent todo,sub todo by path
         self.title = None
         self.detail = None
         self.state = AgentTaskState.TASK_STATE_WAIT
-        self.priority:int = 5 # 1-10
-        self.tags:List[str] = []
+        self.priority: int = 5  # 1-10
+        self.tags: List[str] = []
         self.worker = None
         self.createor = None
 
@@ -291,10 +295,10 @@ class AgentTask:
         # set by llm
         self.next_attention_time = None
         # set by llm
-        self.expiration_time = None 
+        self.expiration_time = None
 
         self.depend_task_ids = []
-        #self.step_todo_ids = []
+        # self.step_todo_ids = []
         self.done_time = None
 
         self.last_plan_time = None
@@ -303,16 +307,16 @@ class AgentTask:
     def is_finish(self) -> bool:
         if self.state == AgentTaskState.TASK_STATE_DONE:
             return True
-        
+
         if self.state == AgentTaskState.TASK_STATE_CANCEL:
             return True
-        
+
         if self.state == AgentTaskState.TASK_STATE_EXPIRED:
             return True
-        
+
         if self.state == AgentTaskState.TASK_STATE_FAILED:
             return True
-        
+
         if self.expiration_time:
             try:
                 expiration_time = datetime.fromisoformat(self.expiration_time).timestamp()
@@ -321,9 +325,9 @@ class AgentTask:
                     return True
             except Exception as e:
                 logger.warning(f"invalid expiration_time {self.expiration_time}")
-        
+
         return False
-    
+
     def can_plan(self) -> bool:
         if self.state == AgentTaskState.TASK_STATE_CONFIRMED or self.state == AgentTaskState.TASK_STATE_CHECKFAILED:
             if self.next_attention_time:
@@ -335,9 +339,9 @@ class AgentTask:
                     logger.warning(f"invalid next_attention_time {self.next_attention_time}")
             else:
                 return True
-            
+
         return False
-    
+
     def to_simple_dict(self) -> dict:
         result = {}
         result["task_id"] = self.task_id
@@ -352,13 +356,12 @@ class AgentTask:
         if self.next_attention_time:
             result["next_attention_time"] = self.next_attention_time
         return result
-        
 
     def to_dict(self) -> dict:
         result = {}
         result["task_id"] = self.task_id
         result["title"] = self.title
-        result["detail"] = self.detail 
+        result["detail"] = self.detail
         result["state"] = self.state.value
         result["priority"] = self.priority
 
@@ -375,10 +378,10 @@ class AgentTask:
             result["due_date"] = self.due_date
         if self.expiration_time:
             result["expiration_time"] = self.expiration_time
-        
+
         if self.next_attention_time:
             result["next_attention_time"] = self.next_attention_time
-        #if self.next_check_time:
+        # if self.next_check_time:
         #    result["next_check_time"] = datetime.fromtimestamp(self.next_check_time).isoformat()
         if self.depend_task_ids:
             if len(self.depend_task_ids) > 0:
@@ -392,8 +395,9 @@ class AgentTask:
             result["last_review_time"] = self.last_review_time
 
         return result
+
     @classmethod
-    def from_dict(cls,json_obj:dict) -> 'AgentTask':
+    def from_dict(cls, json_obj: dict) -> 'AgentTask':
         result = AgentTask()
         result.task_id = json_obj.get("task_id")
         result.title = json_obj.get("title")
@@ -406,7 +410,7 @@ class AgentTask:
         result.due_date = json_obj.get("due_date")
         result.next_attention_time = json_obj.get("next_attention_time")
         result.depend_task_ids = json_obj.get("depend_task_ids")
-        #result.step_todo_ids = json_obj.get("step_todo_ids")
+        # result.step_todo_ids = json_obj.get("step_todo_ids")
         result.expiration_time = json_obj.get("expiration_time")
         result.create_time = json_obj.get("create_time")
         result.done_time = json_obj.get("done_time")
@@ -418,19 +422,20 @@ class AgentTask:
             return None
 
         return result
+
     @classmethod
-    def create_by_dict(cls,json_obj:dict) -> 'AgentTask':
+    def create_by_dict(cls, json_obj: dict) -> 'AgentTask':
         creator = json_obj.get("creator")
         if creator is None:
             logger.error(f"invalid create task, creator is None")
             return None
-        
+
         result = AgentTask()
-        
+
         result.title = json_obj.get("title")
         result.detail = json_obj.get("detail")
         if result.detail is None:
-            result.detail = result.title 
+            result.detail = result.title
         result.priority = json_obj.get("priority")
         if result.priority is None:
             result.priority = 5
@@ -439,24 +444,25 @@ class AgentTask:
         result.tags = json_obj.get("tags")
         result.worker = json_obj.get("worker")
         result.createor = creator
-    
+
         return result
+
 
 # 谁在什么时间做了什么
 class AgentWorkLog:
     # work type : [triage,plan,do,check]
     def __init__(self) -> None:
         self.logid = "worklog#" + uuid.uuid4().hex
-        self.owner_id:str = None # taskid or todoid
-        self.work_type:str = "" # 默认为普通类型的log,特殊类型的Log一般伴随着重要的状态改变
+        self.owner_id: str = None  # taskid or todoid
+        self.work_type: str = ""  # 默认为普通类型的log,特殊类型的Log一般伴随着重要的状态改变
         self.timestamp = time.time()
-        self.content:str = None
-        self.result:str = None
-        self.meta : dict = None
+        self.content: str = None
+        self.result: str = None
+        self.meta: dict = None
         self.operator = None
 
     @classmethod
-    def create_by_content(cls,owner_id:str,work_type:str,content:str,operator:str) -> 'AgentWorkLog':
+    def create_by_content(cls, owner_id: str, work_type: str, content: str, operator: str) -> 'AgentWorkLog':
         log = AgentWorkLog()
         log.owner_id = owner_id
         log.work_type = work_type
@@ -464,95 +470,90 @@ class AgentWorkLog:
         log.operator = operator
         log.result = "OK"
         return log
-        
 
 
 class AgentTaskManager(ABC):
     def __init__(self) -> None:
         pass
-    
+
     @abstractmethod
-    async def create_task(self,task:AgentTask,parent_id:str = None) -> str:
+    async def create_task(self, task: AgentTask, parent_id: str = None) -> str:
         pass
 
     @abstractmethod
-    async def set_todos(self,owner_task_id:str,todos:List[AgentTodo]):
+    async def set_todos(self, owner_task_id: str, todos: List[AgentTodo]):
         # return todo_id
         pass
 
     @abstractmethod
-    async def append_worklog(self,log:AgentWorkLog):
+    async def append_worklog(self, log: AgentWorkLog):
         pass
 
     @abstractmethod
-    async def get_worklog(self,obj_id:str)->List[AgentWorkLog]:
+    async def get_worklog(self, obj_id: str) -> List[AgentWorkLog]:
         pass
 
-    @abstractmethod   
-    async def get_task(self,task_id:str) -> AgentTask:
+    @abstractmethod
+    async def get_task(self, task_id: str) -> AgentTask:
         pass
 
-    #@abstractmethod
-    #async def get_task_by_fullpath(self,task_path:str) -> AgentTask:
+    # @abstractmethod
+    # async def get_task_by_fullpath(self,task_path:str) -> AgentTask:
     #    pass
 
-    @abstractmethod   
-    async def get_todo(self,todo_id:str) -> AgentTodo:
+    @abstractmethod
+    async def get_todo(self, todo_id: str) -> AgentTodo:
         pass
 
-    @abstractmethod    
-    async def get_sub_tasks(self,task_id:str) -> List[AgentTask]:
+    @abstractmethod
+    async def get_sub_tasks(self, task_id: str) -> List[AgentTask]:
         pass
 
-    @abstractmethod    
-    async def get_sub_todos(self,task_id:str) -> List[AgentTodo]:
+    @abstractmethod
+    async def get_sub_todos(self, task_id: str) -> List[AgentTodo]:
         pass
 
-    #@abstractmethod    
-    #async def get_task_depends(self,task_id:str) -> List[AgentTask]:
+    # @abstractmethod
+    # async def get_task_depends(self,task_id:str) -> List[AgentTask]:
     #    pass
 
-    @abstractmethod    
-    async def list_task(self,filter:Optional[dict] = None) -> List[AgentTask]:
-        pass
-
-    @abstractmethod    
-    async def update_task(self,task:AgentTask):
+    @abstractmethod
+    async def list_task(self, filter: Optional[dict] = None) -> List[AgentTask]:
         pass
 
     @abstractmethod
-    async def update_todo(self,todo:AgentTodo):
+    async def update_task(self, task: AgentTask):
         pass
 
-    #@abstractmethod    
-    #async def update_task_state(self,task_id,state:str):
-    #    pass
-    
-    #@abstractmethod    
-    #async def update_todo_state(self,task_id,state:str):
+    @abstractmethod
+    async def update_todo(self, todo: AgentTodo):
+        pass
+
+    # @abstractmethod
+    # async def update_task_state(self,task_id,state:str):
     #    pass
 
-    #subtask,todo共享其所在task的文件夹
-    @abstractmethod    
-    async def read_task_file(self,task_id:str,path:str)->str:
-        pass
-    
-    @abstractmethod
-    async def write_task_file(self,task_id:str,path:str,content:str):
-        pass
+    # @abstractmethod
+    # async def update_todo_state(self,task_id,state:str):
+    #    pass
 
+    # subtask,todo共享其所在task的文件夹
     @abstractmethod
-    async def append_task_file(self,task_id:str,path:str,content:str):
+    async def read_task_file(self, task_id: str, path: str) -> str:
         pass
 
     @abstractmethod
-    async def list_task_dir(self,task_id:str,path:str):
+    async def write_task_file(self, task_id: str, path: str, content: str):
         pass
 
     @abstractmethod
-    async def remove_task_file(self,task_id:str,path:str):
+    async def append_task_file(self, task_id: str, path: str, content: str):
         pass
 
+    @abstractmethod
+    async def list_task_dir(self, task_id: str, path: str):
+        pass
 
-
-
+    @abstractmethod
+    async def remove_task_file(self, task_id: str, path: str):
+        pass

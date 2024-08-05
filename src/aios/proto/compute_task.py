@@ -5,16 +5,16 @@ import json
 import shlex
 import uuid
 import time
-from typing import List, Union,Dict
-from .ai_function import AIFunction,ActionNode
+from typing import List, Union, Dict
+from .ai_function import AIFunction, ActionNode
 from .agent_msg import AgentMsg
 from ..knowledge import ObjectID
 from ..storage.storage import AIStorage
 
-
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class ComputeTaskResultCode(Enum):
     OK = 0
@@ -30,11 +30,12 @@ class ComputeTaskState(Enum):
     ERROR = 3
     PENDING = 4
 
+
 class ComputeTaskType(Enum):
     NONE = "None"
     LLM_COMPLETION = "llm_completion"
-    TEXT_EMBEDDING ="text_embedding"
-    IMAGE_EMBEDDING ="image_embedding"
+    TEXT_EMBEDDING = "text_embedding"
+    IMAGE_EMBEDDING = "image_embedding"
 
     TEXT_2_IMAGE = "text_2_image"
     IMAGE_2_TEXT = "image_2_text"
@@ -70,36 +71,36 @@ class ComputeTaskType(Enum):
 #     """
 
 class LLMPrompt:
-    def __init__(self,prompt_str = None) -> None:
-        self.messages : List[Dict] = []
+    def __init__(self, prompt_str=None) -> None:
+        self.messages: List[Dict] = []
         if prompt_str:
-            self.messages.append({"role":"user","content":prompt_str})
-        self.system_message : Dict = None
-        self.inner_functions : List[Dict] = []
+            self.messages.append({"role": "user", "content": prompt_str})
+        self.system_message: Dict = None
+        self.inner_functions: List[Dict] = []
 
-    def append_system_message(self,content:str):
+    def append_system_message(self, content: str):
         if content is None:
             return
 
         if self.system_message is None:
-            self.system_message = {"role":"system","content":content}
+            self.system_message = {"role": "system", "content": content}
         else:
             self.system_message["content"] += content
 
-    def append_user_message(self,content:str):
+    def append_user_message(self, content: str):
         if content is None:
             return
 
-        self.messages.append({"role":"user","content":content})
+        self.messages.append({"role": "user", "content": content})
 
-    def as_str(self)->str:
+    def as_str(self) -> str:
         result_str = ""
         if self.system_message:
-            result_str = json.dumps(self.system_message,ensure_ascii=False)
+            result_str = json.dumps(self.system_message, ensure_ascii=False)
         if self.messages:
-            result_str += json.dumps(self.messages,ensure_ascii=False)
+            result_str += json.dumps(self.messages, ensure_ascii=False)
         if self.inner_functions:
-            result_str += json.dumps(self.inner_functions,ensure_ascii=False)
+            result_str += json.dumps(self.inner_functions, ensure_ascii=False)
 
         return result_str
 
@@ -110,9 +111,7 @@ class LLMPrompt:
         result.extend(self.messages)
         return result
 
-
-
-    def append(self,prompt:'LLMPrompt'):
+    def append(self, prompt: 'LLMPrompt'):
         if prompt is None:
             return
 
@@ -130,11 +129,11 @@ class LLMPrompt:
 
         self.messages.extend(prompt.messages)
 
-    def load_from_config(self,config:List[Dict]) -> bool:
-        if isinstance(config,list) is not True:
+    def load_from_config(self, config: List[Dict]) -> bool:
+        if isinstance(config, list) is not True:
             logger.error("prompt is not list!")
             return False
-        self.messages : List[Dict] = []
+        self.messages: List[Dict] = []
         for msg in config:
             if msg.get("content"):
                 if msg.get("role") == "system":
@@ -148,28 +147,28 @@ class LLMPrompt:
 
 class LLMResultStates(Enum):
     IGNORE = "ignore"
-    OK = "ok" # process done
+    OK = "ok"  # process done
     ERROR = "error"
+
 
 class LLMResult:
     def __init__(self) -> None:
-        self.state : str = LLMResultStates.IGNORE
+        self.state: str = LLMResultStates.IGNORE
         self.compute_error_str = None
-        self.resp : str = "" # llm say:
-        self.raw_result = None # raw result from compute kernel
-        #self.inner_functions : List[AIFunction] = []
-        self.action_list : List[ActionNode] = [] # op_list is a optimize design for saving token
-
+        self.resp: str = ""  # llm say:
+        self.raw_result = None  # raw result from compute kernel
+        # self.inner_functions : List[AIFunction] = []
+        self.action_list: List[ActionNode] = []  # op_list is a optimize design for saving token
 
     @classmethod
-    def from_error_str(self,error_str:str) -> 'LLMResult':
+    def from_error_str(self, error_str: str) -> 'LLMResult':
         r = LLMResult()
         r.state = LLMResultStates.ERROR
         r.error_str = error_str
         return r
 
     @classmethod
-    def from_json_str(self,llm_json_str:str) -> 'LLMResult':
+    def from_json_str(self, llm_json_str: str) -> 'LLMResult':
         r = LLMResult()
         if llm_json_str is None:
             r.state = LLMResultStates.IGNORE
@@ -193,14 +192,14 @@ class LLMResult:
         return r
 
     @classmethod
-    def parse_action(cls,func_string:str):
+    def parse_action(cls, func_string: str):
         str_list = shlex.split(func_string)
         func_name = str_list[0]
         params = str_list[1:]
         return func_name, params
 
     @classmethod
-    def from_str(self,llm_result_str:str,valid_func:List[str]=None) -> 'LLMResult':
+    def from_str(self, llm_result_str: str, valid_func: List[str] = None) -> 'LLMResult':
         r = LLMResult()
 
         if llm_result_str is None:
@@ -222,24 +221,22 @@ class LLMResult:
         lines = llm_result_str.splitlines()
         is_need_wait = False
 
-        def check_args(action_item:ActionNode):
+        def check_args(action_item: ActionNode):
             match action_item.name:
-                case "post_msg":# /post_msg $target_id
+                case "post_msg":  # /post_msg $target_id
                     if len(action_item.args) != 1:
                         return False
 
                     new_msg = AgentMsg()
                     target_id = action_item.args[0]
                     msg_content = action_item.body
-                    new_msg.set("",target_id,msg_content)
+                    new_msg.set("", target_id, msg_content)
 
                     return True
 
-
             return False
 
-
-        current_action : ActionNode = None
+        current_action: ActionNode = None
         for line in lines:
             if line.startswith("##/"):
                 if current_action:
@@ -248,8 +245,8 @@ class LLMResult:
                     else:
                         r.action_list.append(current_action)
 
-                action_name,action_args = LLMResult.parse_action(line[3:])
-                current_action = ActionNode(action_name,action_args)
+                action_name, action_args = LLMResult.parse_action(line[3:])
+                current_action = ActionNode(action_name, action_args)
             else:
                 if current_action:
                     current_action.append_body(line + "\n")
@@ -264,6 +261,7 @@ class LLMResult:
 
         r.state = LLMResultStates.OK
         return r
+
 
 class ComputeTask:
     def __init__(self) -> None:
@@ -280,16 +278,16 @@ class ComputeTask:
         self.result = None
         self.error_str = None
 
-    def set_llm_params(self, prompts, resp_mode,model_name, max_token_size, inner_functions = None, callchain_id=None):
+    def set_llm_params(self, prompts, resp_mode, model_name, max_token_size, inner_functions=None, callchain_id=None):
         self.task_type = ComputeTaskType.LLM_COMPLETION
         self.create_time = time.time()
         self.task_id = uuid.uuid4().hex
         self.callchain_id = callchain_id
         self.params["prompts"] = prompts.to_message_list()
         self.params["resp_mode"] = resp_mode
-        
+
         self.params["model_name"] = AIStorage.get_instance().get_user_config().llm_get_real_model_name(model_name)
- 
+
         if max_token_size is None:
             self.params["max_token_size"] = 4000
         else:
@@ -298,7 +296,7 @@ class ComputeTask:
         if inner_functions is not None:
             self.params["inner_functions"] = inner_functions
 
-    def set_text_embedding_params(self, input: str, model_name=None, callchain_id = None):
+    def set_text_embedding_params(self, input: str, model_name=None, callchain_id=None):
         self.task_type = ComputeTaskType.TEXT_EMBEDDING
         self.create_time = time.time()
         self.task_id = uuid.uuid4().hex
@@ -309,7 +307,7 @@ class ComputeTask:
             self.params["model_name"] = "text-embedding-ada-002"
         self.params["input"] = input
 
-    def set_image_embedding_params(self, input = Union[ObjectID, bytes], model_name=None, callchain_id = None):
+    def set_image_embedding_params(self, input=Union[ObjectID, bytes], model_name=None, callchain_id=None):
         self.task_type = ComputeTaskType.IMAGE_EMBEDDING
         self.create_time = time.time()
         self.task_id = uuid.uuid4().hex
@@ -348,7 +346,6 @@ class ComputeTask:
         else:
             self.params["model_name"] = "gpt-4-vision-preview"
 
-
     def display(self) -> str:
         return f"ComputeTask: {self.task_id} {self.task_type} {self.state}"
 
@@ -359,19 +356,16 @@ class ComputeTaskResult:
         self.task_id: str = None
         self.callchain_id: str = None
         self.worker_id: str = None
-        self.error_str : str = None
+        self.error_str: str = None
         self.result_code: int = ComputeTaskResultCode.OK
-        self.result_str: str = None # easy to use,can read from result
+        self.result_str: str = None  # easy to use,can read from result
 
-        self.result : dict = {}
+        self.result: dict = {}
 
         self.result_refers: dict = {}
         self.pading_data: bytearray = None
-
 
     def set_from_task(self, task: ComputeTask):
         self.task_id = task.task_id
         self.callchain_id = task.callchain_id
         task.result = self
-
-

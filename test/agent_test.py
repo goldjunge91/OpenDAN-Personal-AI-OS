@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../src/component/')
 
-from agent_manager import agent_manager
+from agent_manager import AgentManager
 
 def clean_agent():
     print("clean_agent")

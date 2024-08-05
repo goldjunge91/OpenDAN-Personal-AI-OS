@@ -8,14 +8,15 @@ from ..agent.llm_context import GlobaToolsLibrary
 
 logger = logging.getLogger(__name__)
 
+
 class Image2TextFunction(AIFunction):
 
     def __init__(self):
         self.func_id = "aigc.image_2_text"
         self.description = "According to the input image file address, return the description of the image content"
         self.parameters = ParameterDefine.create_parameters({
-                "image_path": {"type": "string", "description": "image file path"}
-            })
+            "image_path": {"type": "string", "description": "image file path"}
+        })
         logger.info(f"init Image2TextFunction")
 
     def register_function(self):
@@ -41,7 +42,6 @@ class Image2TextFunction(AIFunction):
             result = ""
         return result
 
-
     def is_local(self) -> bool:
         return False
 
@@ -50,5 +50,3 @@ class Image2TextFunction(AIFunction):
 
     def is_ready_only(self) -> bool:
         return False
-
-

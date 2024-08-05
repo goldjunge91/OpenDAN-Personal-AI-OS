@@ -10,3 +10,4 @@ log.txt
 credentials.json
 token.json
 chathistory
+/.env_template

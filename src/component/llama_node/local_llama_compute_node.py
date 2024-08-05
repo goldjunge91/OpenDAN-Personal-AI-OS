@@ -1,8 +1,8 @@
-
 import logging
 import requests
 
-from aios import ComputeTask,Queue_ComputeNode, ComputeTaskResult, ComputeTaskResultCode, ComputeTaskState, ComputeTaskType,AIStorage,UserConfig
+from aios import ComputeTask, Queue_ComputeNode, ComputeTaskResult, ComputeTaskResultCode, ComputeTaskState, \
+    ComputeTaskType, AIStorage, UserConfig
 
 logger = logging.getLogger(__name__)
 
@@ -10,13 +10,14 @@ logger = logging.getLogger(__name__)
 This is a custom implementation, it should be redesigned.
 """
 
+
 class LocalLlama_ComputeNode(Queue_ComputeNode):
     def __init__(self, url: str, model_name: str):
         super().__init__()
         self.url = url
         self.model_name = model_name
 
-    async def execute_task(self, task: ComputeTask)->ComputeTaskResult:
+    async def execute_task(self, task: ComputeTask) -> ComputeTaskResult:
         result = ComputeTaskResult()
         result.result_code = ComputeTaskResultCode.ERROR
         result.set_from_task(task)
@@ -28,7 +29,7 @@ class LocalLlama_ComputeNode(Queue_ComputeNode):
                 logger.info(f"call local-llama ({self.url}, {self.model_name}) {model_name} input: {input}")
 
                 self.embedding(input, result)
-                
+
                 if result.result_code == ComputeTaskResultCode.OK:
                     task.state = ComputeTaskState.DONE
                 else:
@@ -39,7 +40,7 @@ class LocalLlama_ComputeNode(Queue_ComputeNode):
             case ComputeTaskType.LLM_COMPLETION:
                 mode_name = task.params["model_name"]
                 prompts = task.params["prompts"]
-                    
+
                 logger.info(f"local-llama({self.url}, {self.model_name}) prompts: {prompts}")
 
                 self.completion(task, result)
@@ -49,14 +50,14 @@ class LocalLlama_ComputeNode(Queue_ComputeNode):
                 else:
                     task.state = ComputeTaskState.ERROR
                     task.error_str = result.error_str
-                
+
             case _:
                 task.state = ComputeTaskState.ERROR
                 result.result_code = ComputeTaskResultCode.ERROR
                 task.error_str = f"ComputeTask's TaskType : {task.task_type} not support!"
                 result.error_str = f"ComputeTask's TaskType : {task.task_type} not support!"
                 return result
-        
+
         return result
 
     async def initial(self) -> bool:
@@ -69,7 +70,9 @@ class LocalLlama_ComputeNode(Queue_ComputeNode):
         pass
 
     def is_support(self, task: ComputeTask) -> bool:
-        return (task.task_type == ComputeTaskType.TEXT_EMBEDDING or task.task_type == ComputeTaskType.LLM_COMPLETION) and (not task.params["model_name"] or task.params["model_name"] == self.model_name)
+        return (
+                    task.task_type == ComputeTaskType.TEXT_EMBEDDING or task.task_type == ComputeTaskType.LLM_COMPLETION) and (
+                    not task.params["model_name"] or task.params["model_name"] == self.model_name)
 
     def is_local(self) -> bool:
         return True
@@ -78,12 +81,14 @@ class LocalLlama_ComputeNode(Queue_ComputeNode):
         body = {
             "input": input
         }
-        
+
         try:
-            response = requests.post(self.url + "/v1/embeddings", json = body, verify=False, headers={"Content-Type": "application/json"})
+            response = requests.post(self.url + "/v1/embeddings", json=body, verify=False,
+                                     headers={"Content-Type": "application/json"})
             response.close()
 
-            logger.info(f"local-llama({self.url}, {self.model_name}) task responsed, request: {body}, status-code: {response.status_code}, headers: {response.headers}, content: {response.content}")
+            logger.info(
+                f"local-llama({self.url}, {self.model_name}) task responsed, request: {body}, status-code: {response.status_code}, headers: {response.headers}, content: {response.content}")
 
             if response.status_code == 200:
                 resp = response.json()
@@ -100,7 +105,7 @@ class LocalLlama_ComputeNode(Queue_ComputeNode):
             result.result_code = ComputeTaskResultCode.ERROR
             result.error_str = str(e)
             return result
-        
+
     def completion(self, task: ComputeTask, result: ComputeTaskResult):
         mode_name = task.params["model_name"]
         prompts = task.params["prompts"]
@@ -134,14 +139,16 @@ class LocalLlama_ComputeNode(Queue_ComputeNode):
                 "role": prompt["role"],
                 "content": prompt["content"]
             })
-        
+
         try:
             logger.info(f"will post http request to {self.url}/v1/chat/completions, body: {body}")
 
-            response = requests.post(self.url + "/v1/chat/completions", json = body, verify=False, headers={"Content-Type": "application/json"})
+            response = requests.post(self.url + "/v1/chat/completions", json=body, verify=False,
+                                     headers={"Content-Type": "application/json"})
             response.close()
 
-            logger.info(f"local-llama({self.url}, {self.model_name}) task responsed, request: {body}, status-code: {response.status_code}, headers: {response.headers}, content: {response.content}")
+            logger.info(
+                f"local-llama({self.url}, {self.model_name}) task responsed, request: {body}, status-code: {response.status_code}, headers: {response.headers}, content: {response.content}")
 
             if response.status_code == 200:
                 resp = response.json()
@@ -164,11 +171,11 @@ class LocalLlama_ComputeNode(Queue_ComputeNode):
                         result.error_str = f"The status code was {status_code}."
                         result.result_code = ComputeTaskResultCode.ERROR
                         return None
-                    
+
                 result.result_code = ComputeTaskResultCode.OK
                 result.result_str = resp["choices"][0]["message"]["content"]
                 result.result["message"] = resp["choices"][0]["message"]
-               
+
                 if token_usage:
                     result.result_refers["token_usage"] = token_usage
 

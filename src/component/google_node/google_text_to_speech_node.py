@@ -1,4 +1,3 @@
-
 import os
 import asyncio
 from asyncio import Queue
@@ -7,10 +6,9 @@ from typing import Optional
 
 from google.cloud import texttospeech
 
-from aios import AIStorage,ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType,ComputeNode
+from aios import AIStorage, ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType, ComputeNode
 
 logger = logging.getLogger(__name__)
-
 
 """
 You need to set the GOOGLE_APPLICATION_CREDENTIALS environment variable when using it.
@@ -178,7 +176,7 @@ class GoogleTextToSpeechNode(ComputeNode):
     def is_local(self) -> bool:
         return False
 
-    def declare_user_config(self,is_optional:bool = False):
+    def declare_user_config(self, is_optional: bool = False):
         if os.getenv("GOOGLE_APPLICATION_CREDENTIALS") is None:
             user_config = AIStorage.get_instance().get_user_config()
             user_config.add_user_config("google_application_credentials",

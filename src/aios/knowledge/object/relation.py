@@ -32,10 +32,10 @@ class ObjectRelationStore:
         )
 
     def add_relation(
-        self,
-        object_id: ObjectID,
-        assoc_id: ObjectID,
-        relation_type: ObjectRelationType = ObjectRelationType.Parent,
+            self,
+            object_id: ObjectID,
+            assoc_id: ObjectID,
+            relation_type: ObjectRelationType = ObjectRelationType.Parent,
     ):
         if relation_type == None:
             relation_type = ObjectRelationType.Parent
@@ -50,7 +50,7 @@ class ObjectRelationStore:
         self.conn.commit()
 
     def get_related_objects(
-        self, object_id: ObjectID, relation_type: Optional[ObjectRelationType] = None
+            self, object_id: ObjectID, relation_type: Optional[ObjectRelationType] = None
     ) -> List[ObjectID]:
         if relation_type:
             self.cursor.execute(
@@ -69,7 +69,7 @@ class ObjectRelationStore:
         return [ObjectID.from_base58(row[0]) for row in self.cursor.fetchall()]
 
     def get_related_root_objects(
-        self, object_id: ObjectID, relation_type: Optional[ObjectRelationType] = None
+            self, object_id: ObjectID, relation_type: Optional[ObjectRelationType] = None
     ) -> List[ObjectID]:
         root_objects = []
         related_objects = self.get_related_objects(object_id, relation_type)

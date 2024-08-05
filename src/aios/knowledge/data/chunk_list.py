@@ -2,6 +2,7 @@ from ..object import HashValue
 from .chunk import ChunkID
 from typing import List
 
+
 class ChunkList:
     def __init__(self, chunk_list: List[ChunkID], hash: HashValue):
         self.chunk_list = chunk_list

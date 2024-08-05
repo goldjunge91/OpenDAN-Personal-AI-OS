@@ -29,7 +29,7 @@ class DuckDuckGoTextSearchFunction(AIFunction):
         return self.description
 
     def get_parameters(self) -> Dict:
-        return self.parameters 
+        return self.parameters
 
     async def execute(self, **kwargs) -> str:
         query = kwargs.get("query")
@@ -44,13 +44,13 @@ class DuckDuckGoTextSearchFunction(AIFunction):
                 max_results=self.max_results
             )]
 
-            return json.dumps(results,,ensure_ascii=False)
+            return json.dumps(results,, ensure_ascii=False)
 
-    def is_local(self) -> bool:
-        return True
+        def is_local(self) -> bool:
+            return True
 
-    def is_in_zone(self) -> bool:
-        return True
+        def is_in_zone(self) -> bool:
+            return True
 
-    def is_ready_only(self) -> bool:
-        return False
+        def is_ready_only(self) -> bool:
+            return False

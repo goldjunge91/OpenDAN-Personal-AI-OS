@@ -3,6 +3,7 @@ from ..object import ObjectID
 
 ChunkID = ObjectID
 
+
 class PositionType(IntEnum):
     Unknown = 1
     Device = 2

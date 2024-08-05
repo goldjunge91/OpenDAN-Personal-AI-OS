@@ -9,6 +9,7 @@ from typing import Tuple, List
 
 logger = logging.getLogger(__name__)
 
+
 class AgentMsgType(Enum):
     TYPE_MSG = 0
     TYPE_GROUPMSG = 1
@@ -27,6 +28,7 @@ class AgentMsgStatus(Enum):
     RECVED = 5
     EXECUTED = 6
 
+
 # msg is a msg / msg resp
 # msg body可以有内容类型（MIME标签），text, image, voice, video, file,以及富文本(html)
 # msg is a inner function call with result
@@ -40,35 +42,34 @@ class AgentMsgStatus(Enum):
 #       在不同的session中看到的msgid不同
 
 class AgentMsg:
-    def __init__(self,msg_type=AgentMsgType.TYPE_MSG) -> None:
+    def __init__(self, msg_type=AgentMsgType.TYPE_MSG) -> None:
         self.msg_id = "msg#" + uuid.uuid4().hex
-        self.msg_type:AgentMsgType = msg_type
+        self.msg_type: AgentMsgType = msg_type
 
-        self.prev_msg_id:str = None
-        self.quote_msg_id:str = None
-        self.rely_msg_id:str = None # if not none means this is a respone msg
-        self.session_id:str = None
+        self.prev_msg_id: str = None
+        self.quote_msg_id: str = None
+        self.rely_msg_id: str = None  # if not none means this is a respone msg
+        self.session_id: str = None
 
-        #forword info
-
+        # forword info
 
         self.create_time = 0
         self.done_time = 0
-        self.topic:str = None # topic is use to find session, not store in db
+        self.topic: str = None  # topic is use to find session, not store in db
 
-        self.sender:str = None # obj_id.sub_objid@tunnel_id
-        self.target:str = None
-        self.mentions:[] = None #use in group chat only
-        #self.title:str = None
-        self.body:str = None
-        self.body_mime:str = None #//default is "text/plain",encode is utf8
+        self.sender: str = None  # obj_id.sub_objid@tunnel_id
+        self.target: str = None
+        self.mentions: [] = None  # use in group chat only
+        # self.title:str = None
+        self.body: str = None
+        self.body_mime: str = None  # //default is "text/plain",encode is utf8
 
-        #type is call / action
+        # type is call / action
         self.func_name = None
         self.args = None
         self.result_str = None
 
-        #type is event
+        # type is event
         self.event_name = None
         self.event_args = None
 
@@ -78,17 +79,17 @@ class AgentMsg:
 
         self.action_list = []
 
-        #context info
-        self.context_info:dict= {}
+        # context info
+        self.context_info: dict = {}
 
     @classmethod
-    def from_json(cls,json_obj:dict) -> 'AgentMsg':
+    def from_json(cls, json_obj: dict) -> 'AgentMsg':
         msg = AgentMsg()
 
         return msg
 
     @classmethod
-    def create_internal_call_msg(self,func_name:str,args:dict,prev_msg_id:str,caller:str):
+    def create_internal_call_msg(self, func_name: str, args: dict, prev_msg_id: str, caller: str):
         msg = AgentMsg(AgentMsgType.TYPE_INTERNAL_CALL)
         msg.create_time = time.time()
         msg.func_name = func_name
@@ -97,29 +98,29 @@ class AgentMsg:
         msg.sender = caller
         return msg
 
-    def create_action_msg(self,action_name:str,args:dict,caller:str):
+    def create_action_msg(self, action_name: str, args: dict, caller: str):
         msg = AgentMsg(AgentMsgType.TYPE_ACTION)
         msg.create_time = time.time()
         msg.func_name = action_name
         msg.args = args
         msg.prev_msg_id = self.msg_id
-        msg.topic  = self.topic
+        msg.topic = self.topic
         msg.sender = caller
         return msg
 
-    def create_error_resp(self,error_msg:str):
+    def create_error_resp(self, error_msg: str):
         resp_msg = AgentMsg(AgentMsgType.TYPE_SYSTEM)
         resp_msg.create_time = time.time()
 
         resp_msg.rely_msg_id = self.msg_id
         resp_msg.body = error_msg
-        resp_msg.topic  = self.topic
+        resp_msg.topic = self.topic
         resp_msg.sender = self.target
         resp_msg.target = self.sender
 
         return resp_msg
 
-    def create_resp_msg(self,resp_body):
+    def create_resp_msg(self, resp_body):
         resp_msg = AgentMsg()
         resp_msg.create_time = time.time()
 
@@ -131,7 +132,7 @@ class AgentMsg:
 
         return resp_msg
 
-    def create_group_resp_msg(self,sender_id,resp_body):
+    def create_group_resp_msg(self, sender_id, resp_body):
         resp_msg = AgentMsg(AgentMsgType.TYPE_GROUPMSG)
         resp_msg.create_time = time.time()
 
@@ -143,7 +144,7 @@ class AgentMsg:
 
         return resp_msg
 
-    def set(self,sender:str,target:str,body:str,topic:str=None,body_mime:str=None) -> None:
+    def set(self, sender: str, target: str, body: str, topic: str = None, body_mime: str = None) -> None:
         self.sender = sender
         self.target = target
         self.body = body
@@ -179,7 +180,8 @@ class AgentMsg:
         body = json.loads(audio_body)
         return body.get("prompt"), body.get("audio")
 
-    def set_image(self, sender: str, target: str, image_format: str, images: [str], prompt: str = None, topic: str = None):
+    def set_image(self, sender: str, target: str, image_format: str, images: [str], prompt: str = None,
+                  topic: str = None):
         self.sender = sender
         self.target = target
         self.create_time = time.time()
@@ -262,5 +264,3 @@ class AgentMsg:
 
     def get_quote_msg_id(self) -> str:
         return self.quote_msg_id
-
-

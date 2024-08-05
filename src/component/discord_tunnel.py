@@ -18,7 +18,6 @@ from aios.storage.storage import AIStorage
 
 logger = logging.getLogger(__name__)
 
-
 IMAGE_FORMATS = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "tiff", "tif"]
 VIDEO_FORMATS = ["mp4", "avi", "mov", "wmv", "flv", "mkv", "webm"]
 AUDIO_FORMATS = ["mp3", "wav", "ogg", "flac", "aac", "m4a", "wma", "ape", "alac", "opus", "oga"]
@@ -62,7 +61,6 @@ class DiscordTunnel(AgentTunnel):
         if not os.path.exists(path):
             os.makedirs(path)
         return path
-
 
     def post_message(self, msg: AgentMsg) -> None:
         if self.client is None:
@@ -156,7 +154,8 @@ class DiscordTunnel(AgentTunnel):
 
             resp_msg: AgentMsg = await self.ai_bus.send_message(agent_msg)
             if resp_msg is None:
-                await message.channel.send(f"System Error: Timeout,{self.target_id}  no resopnse! Please check logs/aios.log for more details!")
+                await message.channel.send(
+                    f"System Error: Timeout,{self.target_id}  no resopnse! Please check logs/aios.log for more details!")
             else:
                 if resp_msg.body_mime is None:
                     if resp_msg.body is None:
@@ -180,7 +179,7 @@ class DiscordTunnel(AgentTunnel):
                     else:
                         pos = resp_msg.body.find("audio file")
                         if pos != -1:
-                            audio_file = resp_msg.body[pos+11:].strip()
+                            audio_file = resp_msg.body[pos + 11:].strip()
                             if audio_file.startswith("\""):
                                 audio_file = audio_file[1:-1]
                             await message.channel.send(file=discord.File(audio_file))

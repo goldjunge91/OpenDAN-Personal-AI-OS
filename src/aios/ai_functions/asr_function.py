@@ -8,17 +8,19 @@ from ..frame.compute_kernel import ComputeKernel
 
 logger = logging.getLogger(__name__)
 
+
 class AsrFunction(AIFunction):
     def __init__(self):
         self.func_id = "aigc.voice_to_text"
         self.description = "Voice recognition, convert the voice into text"
         self.parameters = ParameterDefine.create_parameters({
-                "audio_file": {"type": "string", "description": "Audio file path"},
-                "model": {"type": "string", "description": "Recognition model", "enum": ["openai-whisper"]},
-                "prompt": {"type": "string", "description": "Prompt statement, can be None"},
-                "response_format": {"type": "string", "description": "Return format", "enum": ["text", "json", "srt", "verbose_json", "vtt"]},
-            })
-        
+            "audio_file": {"type": "string", "description": "Audio file path"},
+            "model": {"type": "string", "description": "Recognition model", "enum": ["openai-whisper"]},
+            "prompt": {"type": "string", "description": "Prompt statement, can be None"},
+            "response_format": {"type": "string", "description": "Return format",
+                                "enum": ["text", "json", "srt", "verbose_json", "vtt"]},
+        })
+
     def register_function(self):
         GlobaToolsLibrary.get_instance().register_tool_function(self)
 

@@ -11,7 +11,8 @@ import base64
 import requests
 from openai._types import NOT_GIVEN
 
-from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType,ComputeTaskResultCode,ComputeNode,AIStorage,UserConfig
+from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType, ComputeTaskResultCode, ComputeNode, \
+    AIStorage, UserConfig
 from aios import image_utils
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class OpenAI_ComputeNode(ComputeNode):
     _instance = None
+
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
@@ -29,7 +31,7 @@ class OpenAI_ComputeNode(ComputeNode):
     def declare_user_config(cls):
         if os.getenv("OPENAI_API_KEY") is None:
             user_config = AIStorage.get_instance().get_user_config()
-            user_config.add_user_config("openai_api_key","openai api key",False,None)
+            user_config.add_user_config("openai_api_key", "openai api key", False, None)
 
     def __init__(self) -> None:
         super().__init__()
@@ -39,7 +41,6 @@ class OpenAI_ComputeNode(ComputeNode):
         self.openai_api_key = None
         self.node_id = "openai_node"
         self.task_queue = Queue()
-
 
     async def initial(self):
         if os.getenv("OPENAI_API_KEY") is not None:
@@ -62,7 +63,7 @@ class OpenAI_ComputeNode(ComputeNode):
     async def remove_task(self, task_id: str):
         pass
 
-    def message_to_dict(self, message)->dict:
+    def message_to_dict(self, message) -> dict:
         result = message.dict()
         # result_msg = {}
         # #message.json()
@@ -98,7 +99,7 @@ class OpenAI_ComputeNode(ComputeNode):
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.openai_api_key }"
+            "Authorization": f"Bearer {self.openai_api_key}"
         }
         model_name = task.params["model_name"]
         image_path = task.params["image_path"]
@@ -154,7 +155,7 @@ class OpenAI_ComputeNode(ComputeNode):
                 logger.info(f"call openai {model_name} input: {input}")
                 try:
                     resp = openai.Embedding.create(model=model_name,
-                                                input=input)
+                                                   input=input)
                 except Exception as e:
                     logger.error(f"openai run TEXT_EMBEDDING task error: {e}")
                     task.state = ComputeTaskState.ERROR
@@ -195,7 +196,7 @@ class OpenAI_ComputeNode(ComputeNode):
                 prompts = task.params["prompts"]
                 resp_mode = task.params["resp_mode"]
                 if resp_mode == "json":
-                    response_format = { "type": "json_object" }
+                    response_format = {"type": "json_object"}
                 else:
                     response_format = None
                 max_token_size = task.params.get("max_token_size")
@@ -219,19 +220,20 @@ class OpenAI_ComputeNode(ComputeNode):
                         if mode_name != "gpt-4-vision-preview":
                             logger.info(f"call openai {mode_name} prompts: {prompts}")
                         resp = await client.chat.completions.create(model=mode_name,
-                                                        messages=prompts,
-                                                        response_format = response_format,
-                                                        max_tokens=result_token,
-                                                        )
+                                                                    messages=prompts,
+                                                                    response_format=response_format,
+                                                                    max_tokens=result_token,
+                                                                    )
                     else:
                         if mode_name != "gpt-4-vision-preview":
-                            logger.info(f"call openai {mode_name} prompts: \n\t {prompts} \nfunctions: \n\t{json.dumps(llm_inner_functions,ensure_ascii=False)}")
+                            logger.info(
+                                f"call openai {mode_name} prompts: \n\t {prompts} \nfunctions: \n\t{json.dumps(llm_inner_functions, ensure_ascii=False)}")
                         resp = await client.chat.completions.create(model=mode_name,
-                                                            messages=prompts,
-                                                            response_format = response_format,
-                                                            functions=llm_inner_functions,
-                                                            max_tokens=result_token,
-                                                            ) # TODO: add temperature to task params?
+                                                                    messages=prompts,
+                                                                    response_format=response_format,
+                                                                    functions=llm_inner_functions,
+                                                                    max_tokens=result_token,
+                                                                    )  # TODO: add temperature to task params?
                 except Exception as e:
                     logger.error(f"openai run LLM_COMPLETION task error: {e}")
                     task.state = ComputeTaskState.ERROR
@@ -239,8 +241,8 @@ class OpenAI_ComputeNode(ComputeNode):
                     result.error_str = str(e)
                     return result
 
-                #logger.info(f"openai response: {resp}")
-                #TODO: gpt-4v api is image_2_text ?
+                # logger.info(f"openai response: {resp}")
+                # TODO: gpt-4v api is image_2_text ?
                 if mode_name == "gpt-4-vision-preview":
                     status_code = resp.choices[0].finish_reason
                     if status_code is None:
@@ -303,24 +305,22 @@ class OpenAI_ComputeNode(ComputeNode):
     def get_capacity(self):
         pass
 
-
     def is_support(self, task: ComputeTask) -> bool:
         if task.task_type == ComputeTaskType.LLM_COMPLETION:
             if not task.params["model_name"]:
                 return True
-            model_name : str = task.params["model_name"]
+            model_name: str = task.params["model_name"]
             if model_name.startswith("gpt-"):
                 return True
 
         if task.task_type == ComputeTaskType.IMAGE_2_TEXT:
-            model_name : str = task.params["model_name"]
+            model_name: str = task.params["model_name"]
             if model_name.startswith("gpt-4"):
                 return True
-        #if task.task_type == ComputeTaskType.TEXT_EMBEDDING:
+        # if task.task_type == ComputeTaskType.TEXT_EMBEDDING:
         #    if task.params["model_name"] == "text-embedding-ada-002":
         #        return True
         return False
-
 
     def is_local(self) -> bool:
         return False

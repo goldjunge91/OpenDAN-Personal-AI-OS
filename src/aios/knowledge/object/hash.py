@@ -2,6 +2,7 @@ import hashlib
 import base58
 import base36
 
+
 class HashValue:
     def __init__(self, value: bytes):
         assert len(value) == 32, "HashValue must be 32 bytes long"
@@ -9,7 +10,7 @@ class HashValue:
 
     def __str__(self) -> str:
         return self.to_base58()
-        
+
     @staticmethod
     def hash_data(data):
         return hash_data(data)
@@ -31,8 +32,8 @@ class HashValue:
         # Decode to int and then convert to bytes
         num = base36.loads(s)
         return HashValue(num.to_bytes((num.bit_length() + 7) // 8, 'big'))
-    
-    
+
+
 HASH_VALUE_LEN = 32
 
 

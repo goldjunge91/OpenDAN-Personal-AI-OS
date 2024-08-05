@@ -10,7 +10,7 @@ class ChunkStore:
 
         if not os.path.exists(root_dir):
             os.makedirs(root_dir)
-            
+
         self.root = root_dir
         self.blob = FileBlobStorage(root_dir)
 
@@ -22,7 +22,6 @@ class ChunkStore:
 
     def delete_chunk(self, chunk_id: ChunkID):
         self.blob.delete(chunk_id)
-      
+
     def get_chunk_file_path(self, chunk_id: ChunkID) -> str:
         return self.blob.get_full_path(chunk_id, False)
-    

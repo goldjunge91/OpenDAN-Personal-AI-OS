@@ -77,9 +77,9 @@ debug_mode = _get_env_bool("JARVIS_DEBUG_MODE") or False
 log_level = _get_env_log_level("JARVIS_LOG_LEVEL") or logging.INFO
 
 # The main llm model
-llm_model = _get_env_str("JARVIS_LLM_MODEL") or "gpt-3.5-turbo-0301"
+llm_model = _get_env_str("JARVIS_LLM_MODEL") or "gpt-4o-mini"
 # The model used to handle some simple tasks
-small_llm_model = _get_env_str("JARVIS_SMALL_LLM_MODEL") or "gpt-3.5-turbo-0301"
+small_llm_model = _get_env_str("JARVIS_SMALL_LLM_MODEL") or "gpt-4o-mini"
 token_limit = _get_env_int("JARVIS_TOKEN_LIMIT") or 4000
 
 openai_api_key = _get_env_str("JARVIS_OPENAI_API_KEY", True)

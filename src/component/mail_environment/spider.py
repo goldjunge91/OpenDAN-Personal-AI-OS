@@ -11,12 +11,12 @@ from .mail import Mail, MailStorage
 
 
 class EmailSpider:
-    def __init__(self, env: KnowledgePipelineEnvironment, config:dict): 
+    def __init__(self, env: KnowledgePipelineEnvironment, config: dict):
         self.config = config
         self.env = env
         self.env.get_logger().info(f"read email config from {self.config.get('imap_server')}")
         self.client = imaplib.IMAP4_SSL(
-            host=self.config.get('imap_server'), 
+            host=self.config.get('imap_server'),
             port=self.config.get('imap_port')
         )
         self.client.login(self.config.get('address'), self.config.get('password'))
@@ -24,7 +24,6 @@ class EmailSpider:
         local_path = string.Template(config["path"]).substitute(myai_dir=AIStorage.get_instance().get_myai_dir())
         local_path = os.path.join(local_path, self.config.get('address'))
         self.mail_storage = MailStorage(local_path)
-       
 
     async def next(self):
         while True:
@@ -38,7 +37,7 @@ class EmailSpider:
             if len(uid_list) == 0:
                 yield (None, None)
                 continue
-            
+
             journals = self.env.journal.latest_journals(1)
             from_uid = 0
             if len(journals) == 1:
@@ -50,7 +49,7 @@ class EmailSpider:
                 if int.from_bytes(uid_list[-1]) <= from_uid:
                     yield (None, None)
                     continue
-            
+
             for uid in uid_list:
                 _uid = int.from_bytes(uid)
                 if _uid > from_uid:
@@ -64,8 +63,5 @@ class EmailSpider:
                         yield (None, None)
                         break
                     yield (ObjectID.from_base58(id), str(_uid))
-                   
 
             yield (None, None)
-
-    

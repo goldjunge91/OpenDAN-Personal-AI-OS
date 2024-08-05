@@ -9,7 +9,8 @@ from PIL import Image
 from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
-from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType,ComputeTaskResultCode,ComputeNode,AIStorage,UserConfig
+from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType, ComputeTaskResultCode, ComputeNode, \
+    AIStorage, UserConfig
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class Stability_ComputeNode(ComputeNode):
             self.default_model = os.getenv("STABILITY_DEFAULT_MODEL")
         else:
             self.default_model = AIStorage.get_instance().get_user_config().get_value("stability_default_model")
-        
+
         if self.default_model is None:
             self.default_model = "stable-diffusion-512-v2-1"
 
@@ -96,7 +97,7 @@ class Stability_ComputeNode(ComputeNode):
         result = ComputeTaskResult()
         result.result_code = ComputeTaskResultCode.ERROR
         result.set_from_task(task)
-        
+
         model_name = task.params["model_name"]
         prompt = task.params["prompt"]
         negative_prompt = task.params["negative_prompt"]

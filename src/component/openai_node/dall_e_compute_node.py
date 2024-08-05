@@ -9,7 +9,8 @@ import base64
 
 from PIL import Image
 
-from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType, ComputeTaskResultCode,ComputeNode, AIStorage, UserConfig
+from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType, ComputeTaskResultCode, ComputeNode, \
+    AIStorage, UserConfig
 
 logger = logging.getLogger(__name__)
 
@@ -99,14 +100,14 @@ class DallEComputeNode(ComputeNode):
             image = Image.open(io.BytesIO(binary_data))
             file_name = os.path.join(self.output_dir, task.task_id + ".png")
             image.save(file_name)
-            
+
             task.state = ComputeTaskState.DONE
             result.result_code = ComputeTaskResultCode.OK
             result.worker_id = self.node_id
             result.result = {"file": file_name}
 
             return result
-        
+
         except Exception as e:
             logging.error(f"Call DallE failed. err: {e}")
             task.error_str = str(e)

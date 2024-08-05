@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from ..proto.compute_task import ComputeTask, ComputeTaskType
 
+
 class ComputeNode(ABC):
     def __init__(self) -> None:
         self.node_id = "default"
@@ -38,12 +39,13 @@ class ComputeNode(ABC):
     # the hit weight when select this node in schedule
     def weight(self) -> int:
         return 1
-    
+
     def is_trusted(self) -> bool:
         return True
 
     def get_fee_type(self) -> str:
         return "free"
+
 
 class LocalComputeNode(ComputeNode):
     def display(self) -> str:

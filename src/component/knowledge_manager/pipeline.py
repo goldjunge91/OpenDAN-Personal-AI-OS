@@ -13,8 +13,8 @@ class KnowledgePipelineManager:
 
     @classmethod
     def get_instance(cls):
-        return cls._instance    
-    
+        return cls._instance
+
     def __init__(self, root_dir: str):
         self.root_dir = root_dir
         self.input_modules = {}
@@ -26,7 +26,7 @@ class KnowledgePipelineManager:
 
     def register_input(self, name: str, init_method):
         self.input_modules[name] = init_method
-        
+
     def register_parser(self, name: str, parser_method):
         self.parser_modules[name] = parser_method
 
@@ -34,7 +34,7 @@ class KnowledgePipelineManager:
         name = config["name"]
         if name in self.pipelines["names"]:
             return
-        
+
         input_module = config["input"]["module"]
         _, ext = os.path.splitext(input_module)
         if ext == ".py":
@@ -58,7 +58,6 @@ class KnowledgePipelineManager:
                 parser_init = self.parser_modules.get(parser_module)
             parser_params = parser_config.get("params")
 
-
         data_path = os.path.join(self.root_dir, name)
         env = KnowledgePipelineEnvironment(data_path)
         pipeline = KnowledgePipeline(name, env, input_init, input_params, parser_init, parser_params)
@@ -67,7 +66,7 @@ class KnowledgePipelineManager:
 
     def get_pipelines(self) -> [KnowledgePipeline]:
         return self.pipelines["running"]
-    
+
     def get_pipeline(self, name: str) -> KnowledgePipeline:
         return self.pipelines["names"].get(name)
 
@@ -80,7 +79,7 @@ class KnowledgePipelineManager:
     def load_dir(self, root: str):
         config_path = os.path.join(root, "pipelines.toml")
         if not os.path.exists(config_path):
-            return 
+            return
         with open(config_path, "r") as f:
             config = toml.load(f)
         for path in config["pipelines"]:

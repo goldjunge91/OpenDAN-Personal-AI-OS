@@ -58,7 +58,7 @@ class OpenAITTSComputeNode(ComputeNode):
 
         asyncio.create_task(_run_task_loop())
 
-    async def _run_task(self,task: ComputeTask):
+    async def _run_task(self, task: ComputeTask):
         task.state = ComputeTaskState.RUNNING
         text = task.params["text"]
         voice_name = task.params["voice_name"]
@@ -69,7 +69,7 @@ class OpenAITTSComputeNode(ComputeNode):
             gender = "female"
 
         voice_list = self.voice_list[gender]
-        voice = voice_list[hash(voice_name)%len(voice_list)]
+        voice = voice_list[hash(voice_name) % len(voice_list)]
 
         model_name = task.params['model_name']
         if model_name is None:
@@ -109,10 +109,10 @@ class OpenAITTSComputeNode(ComputeNode):
 
     def is_support(self, task: ComputeTask) -> bool:
         if task.task_type == ComputeTaskType.TEXT_2_VOICE:
-            if task.params['model_name'] is None or task.params['model_name'] == 'tts-1' or task.params['model_name'] == 'tts-1-hd':
+            if task.params['model_name'] is None or task.params['model_name'] == 'tts-1' or task.params[
+                'model_name'] == 'tts-1-hd':
                 return True
         return False
-
 
     def is_local(self) -> bool:
         return False

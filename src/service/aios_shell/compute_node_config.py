@@ -20,8 +20,8 @@ import sys
 import os
 import toml
 
-
 from aios import AIStorage
+
 directory = os.path.dirname(__file__)
 sys.path.append(directory + '/../../component/')
 
@@ -39,7 +39,7 @@ class ComputeNodeConfig:
             cls._instance.__singleton_init__()
 
         return cls._instance
-    
+
     def initial(self) -> List[LocalLlama_ComputeNode]:
         config_path = self.__config_path()
         logging.info(f"initial nodes from {config_path}")
@@ -48,7 +48,7 @@ class ComputeNodeConfig:
             self.config = toml.load(self.__config_path())
             if self.config is None:
                 return []
-            
+
             nodes = []
             llama_nodes_cfg = self.config["llama"]
             if llama_nodes_cfg is not None:
@@ -59,11 +59,11 @@ class ComputeNodeConfig:
             return nodes
 
         return []
-        
+
     def save(self):
         with open(self.__config_path(), "w") as f:
             toml.dump(self.config, f)
-        
+
     def add_node(self, model_type: str, url: str, model_name: str):
         if model_type == "llama":
             llama_nodes_cfg = self.config.get("llama") or []
@@ -72,8 +72,7 @@ class ComputeNodeConfig:
                     return
             llama_nodes_cfg.append({"url": url, "model_name": model_name})
             self.config["llama"] = llama_nodes_cfg
-    
-    
+
     def remove_node(self, model_type: str, url: str, model_name: str):
         if model_type == "llama":
             llama_nodes_cfg = self.config.get("llama") or []

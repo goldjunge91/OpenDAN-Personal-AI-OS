@@ -1,0 +1,447 @@
+{
+  "Args" : [ "./service/aios_shell/aios_shell.py" ],
+  "Config" : {
+    "healthcheck" : null,
+    "AttachStderr" : true,
+    "AttachStdin" : true,
+    "AttachStdout" : true,
+    "Cmd" : [ "python3", "./service/aios_shell/aios_shell.py" ],
+    "Domainname" : "",
+    "Entrypoint" : null,
+    "Env" : [ "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "LANG=C.UTF-8", "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D", "PYTHON_VERSION=3.11.5", "PYTHON_PIP_VERSION=23.2.1", "PYTHON_SETUPTOOLS_VERSION=65.5.1", "PYTHON_GET_PIP_URL=https://github.com/pypa/get-pip/raw/9af82b715db434abb94a0a6f3569f43e72157346/public/get-pip.py", "PYTHON_GET_PIP_SHA256=45a2bb8bf2bb5eff16fdd00faef6f29731831c7c59bd9fc2bf1f3bed511ff1fe", "PYTHONDONTWRITEBYTECODE=1", "PYTHONUNBUFFERED=1" ],
+    "ExposedPorts" : null,
+    "Hostname" : "60cd72317243",
+    "Image" : "paios/aios:latest",
+    "Labels" : { },
+    "MacAddress" : null,
+    "NetworkDisabled" : null,
+    "OnBuild" : null,
+    "OpenStdin" : true,
+    "PortSpecs" : null,
+    "StdinOnce" : true,
+    "Tty" : true,
+    "User" : "",
+    "Volumes" : null,
+    "WorkingDir" : "/opt/aios",
+    "Healthcheck" : null
+  },
+  "Created" : "2024-07-27T15:49:57.519353652Z",
+  "Driver" : "overlay2",
+  "ExecDriver" : null,
+  "HostConfig" : {
+    "Binds" : [ "/your/local/myai/:/root/myai:rw" ],
+    "BlkioWeight" : 0,
+    "BlkioWeightDevice" : [ ],
+    "BlkioDeviceReadBps" : [ ],
+    "BlkioDeviceWriteBps" : [ ],
+    "BlkioDeviceReadIOps" : [ ],
+    "BlkioDeviceWriteIOps" : [ ],
+    "MemorySwappiness" : null,
+    "NanoCpus" : 0,
+    "CapAdd" : null,
+    "CapDrop" : null,
+    "ContainerIDFile" : "",
+    "CpuPeriod" : 0,
+    "CpuRealtimePeriod" : 0,
+    "CpuRealtimeRuntime" : 0,
+    "CpuShares" : 0,
+    "CpuQuota" : 0,
+    "CpusetCpus" : "",
+    "CpusetMems" : "",
+    "Devices" : [ ],
+    "DeviceCgroupRules" : null,
+    "DeviceRequests" : null,
+    "DiskQuota" : null,
+    "Dns" : [ ],
+    "DnsOptions" : [ ],
+    "DnsSearch" : [ ],
+    "ExtraHosts" : null,
+    "GroupAdd" : null,
+    "IpcMode" : "private",
+    "Cgroup" : "",
+    "Links" : null,
+    "LogConfig" : {
+      "Type" : "json-file",
+      "Config" : { }
+    },
+    "LxcConf" : null,
+    "Memory" : 0,
+    "MemorySwap" : 0,
+    "MemoryReservation" : 0,
+    "KernelMemory" : null,
+    "NetworkMode" : "bridge",
+    "OomKillDisable" : null,
+    "Init" : null,
+    "AutoRemove" : false,
+    "OomScoreAdj" : 0,
+    "PortBindings" : { },
+    "Privileged" : false,
+    "PublishAllPorts" : false,
+    "ReadonlyRootfs" : false,
+    "RestartPolicy" : {
+      "MaximumRetryCount" : 0,
+      "Name" : "no"
+    },
+    "Ulimits" : [ ],
+    "CpuCount" : 0,
+    "CpuPercent" : 0,
+    "IOMaximumIOps" : 0,
+    "IOMaximumBandwidth" : 0,
+    "VolumesFrom" : null,
+    "Mounts" : null,
+    "PidMode" : "",
+    "Isolation" : null,
+    "SecurityOpt" : null,
+    "StorageOpt" : null,
+    "CgroupParent" : "",
+    "VolumeDriver" : "",
+    "ShmSize" : 67108864,
+    "PidsLimit" : null,
+    "Runtime" : "runc",
+    "Tmpfs" : null,
+    "UTSMode" : "",
+    "UsernsMode" : "",
+    "Sysctls" : null,
+    "ConsoleSize" : [ 45, 177 ],
+    "CgroupnsMode" : "private"
+  },
+  "HostnamePath" : "/var/lib/docker/containers/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f/hostname",
+  "HostsPath" : "/var/lib/docker/containers/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f/hosts",
+  "LogPath" : "/var/lib/docker/containers/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f-json.log",
+  "Id" : "60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f",
+  "SizeRootFs" : null,
+  "Image" : "sha256:a5a01b7dcff6df2c2fe6528c00e1be9a4c130e6d72c104614fc969b95bd0801d",
+  "MountLabel" : "",
+  "Name" : "/aios",
+  "RestartCount" : 0,
+  "NetworkSettings" : {
+    "Bridge" : "",
+    "SandboxID" : "55b64b48475538a45cbe5184d0b18080878ea8f4d41bc286e653e05387a807a7",
+    "HairpinMode" : false,
+    "LinkLocalIPv6Address" : "",
+    "LinkLocalIPv6PrefixLen" : 0,
+    "Ports" : { },
+    "SandboxKey" : "/var/run/docker/netns/55b64b484755",
+    "SecondaryIPAddresses" : null,
+    "SecondaryIPv6Addresses" : null,
+    "EndpointID" : "f726cacd6db5d9e1ecfb54fd23d930031668e8e535c6f71c55db9f0b28f7b4da",
+    "Gateway" : "172.17.0.1",
+    "PortMapping" : null,
+    "GlobalIPv6Address" : "",
+    "GlobalIPv6PrefixLen" : 0,
+    "IPAddress" : "172.17.0.2",
+    "IPPrefixLen" : 16,
+    "IPv6Gateway" : "",
+    "MacAddress" : "02:42:ac:11:00:02",
+    "Networks" : {
+      "bridge" : {
+        "IPAMConfig" : null,
+        "Links" : null,
+        "Aliases" : null,
+        "NetworkID" : "b9044ac8e1cf27b3facb518c6fc0fa8d932c82b141b06e922d8db751890b1013",
+        "EndpointID" : "f726cacd6db5d9e1ecfb54fd23d930031668e8e535c6f71c55db9f0b28f7b4da",
+        "Gateway" : "172.17.0.1",
+        "IPAddress" : "172.17.0.2",
+        "IPPrefixLen" : 16,
+        "IPv6Gateway" : "",
+        "GlobalIPv6Address" : "",
+        "GlobalIPv6PrefixLen" : 0,
+        "MacAddress" : "02:42:ac:11:00:02"
+      }
+    }
+  },
+  "Path" : "python3",
+  "ProcessLabel" : "",
+  "ResolvConfPath" : "/var/lib/docker/containers/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f/resolv.conf",
+  "ExecIDs" : null,
+  "State" : {
+    "oomkilled" : false,
+    "exitCodeLong" : 0,
+    "pidLong" : 145249,
+    "Status" : "running",
+    "Running" : true,
+    "Paused" : false,
+    "Restarting" : false,
+    "OOMKilled" : false,
+    "Dead" : false,
+    "Pid" : 145249,
+    "ExitCode" : 0,
+    "Error" : "",
+    "StartedAt" : "2024-07-27T15:49:58.897104798Z",
+    "FinishedAt" : "0001-01-01T00:00:00Z",
+    "Health" : null
+  },
+  "Volumes" : null,
+  "VolumesRW" : null,
+  "Node" : null,
+  "Mounts" : [ {
+    "Name" : null,
+    "Source" : "/your/local/myai",
+    "Destination" : "/root/myai",
+    "Driver" : null,
+    "Mode" : "",
+    "RW" : true
+  } ],
+  "GraphDriver" : {
+    "Name" : "overlay2",
+    "Data" : {
+      "RootDir" : null,
+      "DeviceId" : null,
+      "DeviceName" : null,
+      "DeviceSize" : null,
+      "dir" : null
+    }
+  },
+  "Platform" : "linux",
+  "Path" : "python3",
+  "Args" : [ "./service/aios_shell/aios_shell.py" ],
+  "ProcessLabel" : "",
+  "Mounts" : [ {
+    "Type" : "bind",
+    "Source" : "/your/local/myai",
+    "Destination" : "/root/myai",
+    "Mode" : "",
+    "RW" : true,
+    "Propagation" : "rprivate"
+  } ],
+  "Platform" : "linux",
+  "Config" : {
+    "Hostname" : "60cd72317243",
+    "Domainname" : "",
+    "User" : "",
+    "AttachStdin" : true,
+    "AttachStdout" : true,
+    "AttachStderr" : true,
+    "Tty" : true,
+    "OpenStdin" : true,
+    "StdinOnce" : true,
+    "Env" : [ "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "LANG=C.UTF-8", "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D", "PYTHON_VERSION=3.11.5", "PYTHON_PIP_VERSION=23.2.1", "PYTHON_SETUPTOOLS_VERSION=65.5.1", "PYTHON_GET_PIP_URL=https://github.com/pypa/get-pip/raw/9af82b715db434abb94a0a6f3569f43e72157346/public/get-pip.py", "PYTHON_GET_PIP_SHA256=45a2bb8bf2bb5eff16fdd00faef6f29731831c7c59bd9fc2bf1f3bed511ff1fe", "PYTHONDONTWRITEBYTECODE=1", "PYTHONUNBUFFERED=1" ],
+    "Cmd" : [ "python3", "./service/aios_shell/aios_shell.py" ],
+    "Image" : "paios/aios:latest",
+    "Volumes" : null,
+    "WorkingDir" : "/opt/aios",
+    "Entrypoint" : null,
+    "OnBuild" : null,
+    "Labels" : { }
+  },
+  "Driver" : "overlay2",
+  "AppArmorProfile" : "docker-default",
+  "HostsPath" : "/var/lib/docker/containers/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f/hosts",
+  "HostnamePath" : "/var/lib/docker/containers/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f/hostname",
+  "GraphDriver" : {
+    "Data" : {
+      "LowerDir" : "/var/lib/docker/overlay2/f1e7841a1f29364e324090a2f5b0f12a291d4b39adf4e7a6d8d1f470f2e9db03-init/diff:/var/lib/docker/overlay2/7e92aabec21c3f0c17a7b6d633563db7e8b5265dbb169ad2ebbb91467603e859/diff:/var/lib/docker/overlay2/2590bc403a19a39b2f35f613a92f9745cdb015db1f0e3f63e9437066a2c84e66/diff:/var/lib/docker/overlay2/084e2cf39fd4b38682f06d4a950da659e43bbe15ea829c1479ed34fa1ac27d12/diff:/var/lib/docker/overlay2/674f5cc97f579ba60fa8bae759af35a43455887457ce8997f4609af8a8a0f830/diff:/var/lib/docker/overlay2/0b40ecc504eef7eab7b59c7bb50f31ef4207a3de9e85b0cc9c19ae9cca911cac/diff:/var/lib/docker/overlay2/a9611571e0f03fcf3048c19a4c71282e49dcfde76aa9db17f3a2ecc845303d29/diff:/var/lib/docker/overlay2/8eeaf40e458f35347cff18d557da6ed7d22df861c38a5866a9cca279607c0898/diff:/var/lib/docker/overlay2/58aff05b247895f2cb00838043c6ea8db3b434e756823b897992b370fea19517/diff:/var/lib/docker/overlay2/ab5cdbae9b577c903fcdb5a424f8924b0872b1d292b07b06931a74d22e49d69e/diff:/var/lib/docker/overlay2/1284723436b4db4a076d1ec88826d8c9afbeb34f257cbc347d67681aeb5d1ce7/diff:/var/lib/docker/overlay2/27f62ba61d5ff10ea05234806517907648f9b47017847a782368ae9fcf709d10/diff:/var/lib/docker/overlay2/e702fd475d71800a081e0a1f2583ddb9abbfb6da4f0d6d1f042f647b3f70ed48/diff:/var/lib/docker/overlay2/992d332849673aaf852acfa3cf30c334e42dcacd4c0cb0ca6ec03cf741708ffd/diff:/var/lib/docker/overlay2/ab475574fc5d4c1e60dde71b0b9ddcb5735025d922605a4a18daeee972648d9a/diff:/var/lib/docker/overlay2/71def97fd122291d0c865bad66d3778497eeab4996805615651bee0ca91b29bc/diff",
+      "MergedDir" : "/var/lib/docker/overlay2/f1e7841a1f29364e324090a2f5b0f12a291d4b39adf4e7a6d8d1f470f2e9db03/merged",
+      "UpperDir" : "/var/lib/docker/overlay2/f1e7841a1f29364e324090a2f5b0f12a291d4b39adf4e7a6d8d1f470f2e9db03/diff",
+      "WorkDir" : "/var/lib/docker/overlay2/f1e7841a1f29364e324090a2f5b0f12a291d4b39adf4e7a6d8d1f470f2e9db03/work"
+    },
+    "Name" : "overlay2"
+  },
+  "Image" : "sha256:a5a01b7dcff6df2c2fe6528c00e1be9a4c130e6d72c104614fc969b95bd0801d",
+  "Created" : "2024-07-27T15:49:57.519353652Z",
+  "Name" : "/aios",
+  "RestartCount" : 0,
+  "NetworkSettings" : {
+    "Bridge" : "",
+    "SandboxID" : "55b64b48475538a45cbe5184d0b18080878ea8f4d41bc286e653e05387a807a7",
+    "SandboxKey" : "/var/run/docker/netns/55b64b484755",
+    "Ports" : { },
+    "HairpinMode" : false,
+    "LinkLocalIPv6Address" : "",
+    "LinkLocalIPv6PrefixLen" : 0,
+    "SecondaryIPAddresses" : null,
+    "SecondaryIPv6Addresses" : null,
+    "EndpointID" : "f726cacd6db5d9e1ecfb54fd23d930031668e8e535c6f71c55db9f0b28f7b4da",
+    "Gateway" : "172.17.0.1",
+    "GlobalIPv6Address" : "",
+    "GlobalIPv6PrefixLen" : 0,
+    "IPAddress" : "172.17.0.2",
+    "IPPrefixLen" : 16,
+    "IPv6Gateway" : "",
+    "MacAddress" : "02:42:ac:11:00:02",
+    "Networks" : {
+      "bridge" : {
+        "IPAMConfig" : null,
+        "Links" : null,
+        "Aliases" : null,
+        "MacAddress" : "02:42:ac:11:00:02",
+        "DriverOpts" : null,
+        "NetworkID" : "b9044ac8e1cf27b3facb518c6fc0fa8d932c82b141b06e922d8db751890b1013",
+        "EndpointID" : "f726cacd6db5d9e1ecfb54fd23d930031668e8e535c6f71c55db9f0b28f7b4da",
+        "Gateway" : "172.17.0.1",
+        "IPAddress" : "172.17.0.2",
+        "IPPrefixLen" : 16,
+        "IPv6Gateway" : "",
+        "GlobalIPv6Address" : "",
+        "GlobalIPv6PrefixLen" : 0,
+        "DNSNames" : null
+      }
+    }
+  },
+  "MountLabel" : "",
+  "State" : {
+    "Status" : "running",
+    "Running" : true,
+    "Paused" : false,
+    "Restarting" : false,
+    "OOMKilled" : false,
+    "Dead" : false,
+    "Pid" : 145249,
+    "ExitCode" : 0,
+    "Error" : "",
+    "StartedAt" : "2024-07-27T15:49:58.897104798Z",
+    "FinishedAt" : "0001-01-01T00:00:00Z"
+  },
+  "ResolvConfPath" : "/var/lib/docker/containers/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f/resolv.conf",
+  "ExecIDs" : null,
+  "HostConfig" : {
+    "Binds" : [ "/your/local/myai/:/root/myai" ],
+    "ContainerIDFile" : "",
+    "LogConfig" : {
+      "Type" : "json-file",
+      "Config" : { }
+    },
+    "NetworkMode" : "bridge",
+    "PortBindings" : { },
+    "RestartPolicy" : {
+      "Name" : "no",
+      "MaximumRetryCount" : 0
+    },
+    "AutoRemove" : false,
+    "VolumeDriver" : "",
+    "VolumesFrom" : null,
+    "ConsoleSize" : [ 45, 177 ],
+    "CapAdd" : null,
+    "CapDrop" : null,
+    "CgroupnsMode" : "private",
+    "Dns" : [ ],
+    "DnsOptions" : [ ],
+    "DnsSearch" : [ ],
+    "ExtraHosts" : null,
+    "GroupAdd" : null,
+    "IpcMode" : "private",
+    "Cgroup" : "",
+    "Links" : null,
+    "OomScoreAdj" : 0,
+    "PidMode" : "",
+    "Privileged" : false,
+    "PublishAllPorts" : false,
+    "ReadonlyRootfs" : false,
+    "SecurityOpt" : null,
+    "UTSMode" : "",
+    "UsernsMode" : "",
+    "ShmSize" : 67108864,
+    "Runtime" : "runc",
+    "Isolation" : "",
+    "CpuShares" : 0,
+    "Memory" : 0,
+    "NanoCpus" : 0,
+    "CgroupParent" : "",
+    "BlkioWeight" : 0,
+    "BlkioWeightDevice" : [ ],
+    "BlkioDeviceReadBps" : [ ],
+    "BlkioDeviceWriteBps" : [ ],
+    "BlkioDeviceReadIOps" : [ ],
+    "BlkioDeviceWriteIOps" : [ ],
+    "CpuPeriod" : 0,
+    "CpuQuota" : 0,
+    "CpuRealtimePeriod" : 0,
+    "CpuRealtimeRuntime" : 0,
+    "CpusetCpus" : "",
+    "CpusetMems" : "",
+    "Devices" : [ ],
+    "DeviceCgroupRules" : null,
+    "DeviceRequests" : null,
+    "MemoryReservation" : 0,
+    "MemorySwap" : 0,
+    "MemorySwappiness" : null,
+    "OomKillDisable" : null,
+    "PidsLimit" : null,
+    "Ulimits" : [ ],
+    "CpuCount" : 0,
+    "CpuPercent" : 0,
+    "IOMaximumIOps" : 0,
+    "IOMaximumBandwidth" : 0,
+    "MaskedPaths" : [ "/proc/asound", "/proc/acpi", "/proc/kcore", "/proc/keys", "/proc/latency_stats", "/proc/timer_list", "/proc/timer_stats", "/proc/sched_debug", "/proc/scsi", "/sys/firmware", "/sys/devices/virtual/powercap" ],
+    "ReadonlyPaths" : [ "/proc/bus", "/proc/fs", "/proc/irq", "/proc/sys", "/proc/sysrq-trigger" ]
+  },
+  "Id" : "60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f",
+  "LogPath" : "/var/lib/docker/containers/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f/60cd72317243c8f8c35d53de12f53b51e2c13380f6a6621e63356b1f1cbb2a6f-json.log"
+}
+
+
+docker history sha256:a5a01b7dcff6df2c2fe6528c00e1be9a4c130e6d72c104614fc969b95bd0801d
+IMAGE          CREATED         CREATED BY                                      SIZE      COMMENT
+a5a01b7dcff6   9 months ago    /bin/sh -c #(nop)  CMD ["python3" "./service…   0B
+<missing>      9 months ago    /bin/sh -c #(nop)  ENV PYTHONUNBUFFERED=1       0B
+<missing>      9 months ago    /bin/sh -c #(nop)  ENV PYTHONDONTWRITEBYTECO…   0B
+<missing>      9 months ago    /bin/sh -c pip install --no-cache-dir -r /op…   5.13GB
+<missing>      9 months ago    /bin/sh -c mkdir -p /root/myai/etc              0B
+<missing>      9 months ago    /bin/sh -c mkdir -p /root/myai/data             0B
+<missing>      9 months ago    /bin/sh -c mkdir -p /root/myai/app              0B
+<missing>      9 months ago    /bin/sh -c #(nop) COPY dir:5b01ebe3a45cebe95…   112kB
+<missing>      9 months ago    /bin/sh -c #(nop) COPY dir:e37af8751f52468e5…   374kB
+<missing>      10 months ago   /bin/sh -c #(nop) WORKDIR /opt/aios             0B
+<missing>      11 months ago   CMD ["python3"]                                 0B        buildkit.dockerfile.v0
+<missing>      11 months ago   RUN /bin/sh -c set -eux;   wget -O get-pip.p…   11.1MB    buildkit.dockerfile.v0
+<missing>      11 months ago   ENV PYTHON_GET_PIP_SHA256=45a2bb8bf2bb5eff16…   0B        buildkit.dockerfile.v0
+<missing>      11 months ago   ENV PYTHON_GET_PIP_URL=https://github.com/py…   0B        buildkit.dockerfile.v0
+<missing>      11 months ago   ENV PYTHON_SETUPTOOLS_VERSION=65.5.1            0B        buildkit.dockerfile.v0
+<missing>      11 months ago   ENV PYTHON_PIP_VERSION=23.2.1                   0B        buildkit.dockerfile.v0
+<missing>      11 months ago   RUN /bin/sh -c set -eux;  for src in idle3 p…   32B       buildkit.dockerfile.v0
+<missing>      11 months ago   RUN /bin/sh -c set -eux;   wget -O python.ta…   50.1MB    buildkit.dockerfile.v0
+<missing>      11 months ago   ENV PYTHON_VERSION=3.11.5                       0B        buildkit.dockerfile.v0
+<missing>      11 months ago   ENV GPG_KEY=A035C8C19219BA821ECEA86B64E628F8…   0B        buildkit.dockerfile.v0
+<missing>      11 months ago   RUN /bin/sh -c set -eux;  apt-get update;  a…   18.6MB    buildkit.dockerfile.v0
+<missing>      11 months ago   ENV LANG=C.UTF-8                                0B        buildkit.dockerfile.v0
+<missing>      11 months ago   ENV PATH=/usr/local/bin:/usr/local/sbin:/usr…   0B        buildkit.dockerfile.v0
+<missing>      10 months ago   /bin/sh -c set -ex;  apt-get update;  apt-ge…   587MB
+<missing>      10 months ago   /bin/sh -c apt-get update && apt-get install…   177MB
+<missing>      10 months ago   /bin/sh -c set -eux;  apt-get update;  apt-g…   48.4MB
+<missing>      10 months ago   /bin/sh -c #(nop)  CMD ["bash"]                 0B
+<missing>      10 months ago   /bin/sh -c #(nop) ADD file:ce04d6a354feaef93…   116MB
+Downloading .gitattributes: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1.23k/1.23k [00:00<00:00, 5.40MB/s]
+Downloading 1_Pooling/config.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 190/190 [00:00<00:00, 1.07MB/s]
+Downloading README.md: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10.7k/10.7k [00:00<00:00, 16.5MB/s]
+Downloading config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 612/612 [00:00<00:00, 2.88MB/s]
+Downloading (…)ce_transformers.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 116/116 [00:00<00:00, 566kB/s]
+Downloading data_config.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████| 39.3k/39.3k [00:00<00:00, 84.5MB/s]
+Downloading model.safetensors: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 90.9M/90.9M [00:03<00:00, 23.0MB/s]
+Downloading model.onnx: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████| 90.4M/90.4M [00:02<00:00, 34.4MB/s]
+Downloading pytorch_model.bin: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 90.9M/90.9M [00:01<00:00, 49.2MB/s]
+Downloading (…)nce_bert_config.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 53.0/53.0 [00:00<00:00, 112kB/s]
+Downloading (…)cial_tokens_map.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 112/112 [00:00<00:00, 649kB/s]
+Downloading tokenizer.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████| 466k/466k [00:00<00:00, 29.3MB/s]
+Downloading tokenizer_config.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 350/350 [00:00<00:00, 1.59MB/s]
+Downloading train_script.py: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 13.2k/13.2k [00:00<00:00, 47.5MB/s]
+Downloading vocab.txt: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 232k/232k [00:00<00:00, 2.50MB/s]
+Downloading modules.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 349/349 [00:00<00:00, 2.33MB/s]
+Downloading .gitattributes: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████| 690/690 [00:00<00:00, 2.49MB/s]
+Downloading (…)LIPModel/config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████| 4.03k/4.03k [00:00<00:00, 20.4MB/s]
+Downloading 0_CLIPModel/merges.txt: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 525k/525k [00:00<00:00, 157MB/s]
+Downloading (…)rocessor_config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 316/316 [00:00<00:00, 1.35MB/s]
+Downloading pytorch_model.bin: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 605M/605M [00:14<00:00, 41.7MB/s]
+Downloading (…)cial_tokens_map.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 389/389 [00:00<00:00, 2.10MB/s]
+Downloading (…)okenizer_config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████| 604/604 [00:00<00:00, 1.42MB/s]
+Downloading 0_CLIPModel/vocab.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 961k/961k [00:00<00:00, 42.2MB/s]
+Downloading README.md: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1.91k/1.91k [00:00<00:00, 9.14MB/s]
+Downloading (…)ce_transformers.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 116/116 [00:00<00:00, 822kB/s]
+Downloading modules.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 122/122 [00:00<00:00, 747kB/s]
+ftfy or spacy is not installed using BERT BasicTokenizer instead of ftfy.
+Downloading .gitattributes: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████| 744/744 [00:00<00:00, 3.36MB/s]
+Downloading 1_Pooling/config.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 190/190 [00:00<00:00, 1.01MB/s]
+Downloading 2_Dense/config.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 115/115 [00:00<00:00, 640kB/s]
+Downloading model.safetensors: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████| 1.57M/1.57M [00:00<00:00, 153MB/s]
+Downloading pytorch_model.bin: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████| 1.57M/1.57M [00:00<00:00, 150MB/s]
+Downloading README.md: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 5.65k/5.65k [00:00<00:00, 21.6MB/s]
+Downloading config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 572/572 [00:00<00:00, 3.92MB/s]
+Downloading (…)ce_transformers.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 122/122 [00:00<00:00, 785kB/s]
+Downloading model.safetensors: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 539M/539M [00:12<00:00, 42.2MB/s]
+Downloading pytorch_model.bin: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 539M/539M [00:06<00:00, 84.6MB/s]
+Downloading (…)nce_bert_config.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 53.0/53.0 [00:00<00:00, 203kB/s]
+Downloading (…)cial_tokens_map.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 112/112 [00:00<00:00, 198kB/s]
+Downloading tokenizer.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████| 1.96M/1.96M [00:00<00:00, 15.5MB/s]
+Downloading tokenizer_config.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████| 371/371 [00:00<00:00, 2.13MB/s]
+Downloading vocab.txt: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 996k/996k [00:00<00:00, 38.2MB/s]
+Downloading modules.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 341/341 [00:00<00:00, 1.98MB/s]
+aios shell 0.5.1 ready. Daemon:False

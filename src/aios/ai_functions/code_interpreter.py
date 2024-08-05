@@ -29,7 +29,6 @@ PATH_SEPARATOR = WIN32 and "\\" or "/"
 
 logger = logging.getLogger(__name__)
 
-
 BUILT_IN_MODULES = set(
     [
         "sys",
@@ -296,7 +295,6 @@ def execute_code(
         with open(filepath, "w", encoding="utf-8") as fout:
             fout.write(code)
 
-
     # check if already running in a docker container
     in_docker_container = os.path.exists("/.dockerenv")
     if not use_docker or in_docker_container:
@@ -424,6 +422,7 @@ def execute_code(
         logs = logs.replace(f"/workspace/{filename if original_filename is None else ''}", "")
     # return the exit code, logs and image
     return exit_code, logs
+
 
 class CodeInterpreterFunction(AIFunction):
     def __init__(self):

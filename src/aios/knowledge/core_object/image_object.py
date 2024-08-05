@@ -3,6 +3,7 @@ from ..data import ChunkList, ChunkListWriter
 from ..object import ObjectType
 import os
 
+
 # desc
 #   meta
 #   tags
@@ -33,13 +34,13 @@ class ImageObject(KnowledgeObject):
 
     def get_tags(self) -> dict:
         return self.desc["tags"]
-    
+
     def get_hash(self) -> str:
         return self.desc["hash"]
 
     def get_file_size(self) -> int:
         return self.desc["file_size"]
-    
+
     def get_chunk_list(self) -> ChunkList:
         return self.body["chunk_list"]
 
@@ -72,7 +73,7 @@ class ImageObjectBuilder:
     def set_meta(self, meta: dict):
         self.meta = meta
         return self
-    
+
     def set_tags(self, tags: dict):
         self.tags = tags
         return self
@@ -86,7 +87,6 @@ class ImageObjectBuilder:
         return self
 
     def build(self, store) -> ImageObject:
-        
         file_size = os.path.getsize(self.image_file)
         chunk_list = store.get_chunk_list_writer().create_chunk_list_from_file(
             self.image_file, 1024 * 1024 * 4, self.restore_file

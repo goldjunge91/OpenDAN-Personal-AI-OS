@@ -6,9 +6,11 @@ from typing import Union
 from PIL import Image
 import io
 
-from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType,ComputeTaskResultCode,ComputeNode,AIStorage,UserConfig,ObjectID,Queue_ComputeNode
+from aios import ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType, ComputeTaskResultCode, ComputeNode, \
+    AIStorage, UserConfig, ObjectID, Queue_ComputeNode
 
 logger = logging.getLogger(__name__)
+
 
 class LocalSentenceTransformer_Text_ComputeNode(Queue_ComputeNode):
     # For valid pretrained models, see https://www.sbert.net/docs/pretrained_models.html
@@ -36,7 +38,7 @@ class LocalSentenceTransformer_Text_ComputeNode(Queue_ComputeNode):
         self.start()
         return True
 
-    async def execute_task(self, task: ComputeTask) :
+    async def execute_task(self, task: ComputeTask):
         result = ComputeTaskResult()
         result.result_code = ComputeTaskResultCode.ERROR
         result.set_from_task(task)
@@ -63,7 +65,6 @@ class LocalSentenceTransformer_Text_ComputeNode(Queue_ComputeNode):
 
         return result
 
-
     def display(self) -> str:
         return f"LocalSentenceTransformer_Text_ComputeNode: {self.node_id}, {self.model_name}"
 
@@ -80,9 +81,9 @@ class LocalSentenceTransformer_Text_ComputeNode(Queue_ComputeNode):
 class LocalSentenceTransformer_Image_ComputeNode(Queue_ComputeNode):
     # For valid pretrained models, see https://www.sbert.net/docs/pretrained_models.html
     def __init__(
-        self,
-        model_name: str = "clip-ViT-B-32",
-        multi_model_name: str = "clip-ViT-B-32-multilingual-v1",
+            self,
+            model_name: str = "clip-ViT-B-32",
+            multi_model_name: str = "clip-ViT-B-32-multilingual-v1",
     ):
         super().__init__()
 
@@ -153,7 +154,7 @@ class LocalSentenceTransformer_Image_ComputeNode(Queue_ComputeNode):
             return None
 
     async def execute_task(
-        self, task: ComputeTask
+            self, task: ComputeTask
     ) -> ComputeTaskResult:
         result = ComputeTaskResult()
         result.result_code = ComputeTaskResultCode.ERROR
@@ -180,7 +181,7 @@ class LocalSentenceTransformer_Image_ComputeNode(Queue_ComputeNode):
                 img = self._load_image(input)
                 if img is None:
                     result.error_str = f"load image failed: {input}"
-                    return result   
+                    return result
 
                 sentence_embeddings = self.model.encode(img, show_progress_bar=False).tolist()
                 result.result_code = ComputeTaskResultCode.OK
@@ -192,8 +193,7 @@ class LocalSentenceTransformer_Image_ComputeNode(Queue_ComputeNode):
 
             logger.error(f"{traceback.format_exc()}, error: {err}")
             result.error_str = f"{traceback.format_exc()}, error: {err}"
- 
-        
+
         return result
 
     def display(self) -> str:
@@ -204,8 +204,8 @@ class LocalSentenceTransformer_Image_ComputeNode(Queue_ComputeNode):
 
     def is_support(self, task: ComputeTask) -> bool:
         return (
-            (task.task_type == ComputeTaskType.TEXT_EMBEDDING and task.params["model_name"] == "clip-ViT-B-32")
-            or task.task_type == ComputeTaskType.IMAGE_EMBEDDING
+                (task.task_type == ComputeTaskType.TEXT_EMBEDDING and task.params["model_name"] == "clip-ViT-B-32")
+                or task.task_type == ComputeTaskType.IMAGE_EMBEDDING
         )
 
     def is_local(self) -> bool:

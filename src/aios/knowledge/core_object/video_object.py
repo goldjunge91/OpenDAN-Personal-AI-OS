@@ -2,6 +2,7 @@ from ..object import KnowledgeObject
 from ..data import ChunkList, ChunkListWriter
 from ..object import ObjectType
 
+
 # desc
 #   meta
 #   tags
@@ -62,7 +63,7 @@ class VideoObjectBuilder:
     def set_meta(self, meta: dict):
         self.meta = meta
         return self
-    
+
     def set_tags(self, tags: dict):
         self.tags = tags
         return self

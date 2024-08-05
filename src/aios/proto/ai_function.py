@@ -1,24 +1,25 @@
 # pylint:disable=E0402
 from abc import ABC, abstractmethod
-from typing import Dict,Coroutine,Callable,List
+from typing import Dict, Coroutine, Callable, List
+
 
 class ParameterDefine:
-    def __init__(self,name:str,desc:str) -> None:
-        self.name:str = name
-        self.type:str = "string"
-        self.enum:List[str] = None
+    def __init__(self, name: str, desc: str) -> None:
+        self.name: str = name
+        self.type: str = "string"
+        self.enum: List[str] = None
         self.description = desc
         self.is_required = True
 
     @classmethod
-    def create_parameters(cls,json_obj:dict) -> Dict[str,'ParameterDefine']:
+    def create_parameters(cls, json_obj: dict) -> Dict[str, 'ParameterDefine']:
         result = {}
-        for k,v in json_obj.items():
-            param = ParameterDefine(k,v)
+        for k, v in json_obj.items():
+            param = ParameterDefine(k, v)
             result[k] = param
 
         return result
-        
+
 
 class AIFunction:
     @abstractmethod
@@ -48,9 +49,9 @@ class AIFunction:
         """
         parameters = self.get_parameters()
         parameters_str = ""
-        for k,v in parameters.items():
+        for k, v in parameters.items():
             if len(v.description) <= 0:
-                parameters_str +=f"{k},"
+                parameters_str += f"{k},"
             else:
                 if v.description == k:
                     parameters_str += f"{k},"
@@ -60,11 +61,11 @@ class AIFunction:
                     else:
                         parameters_str += f"{k} (Optional): {v.description},"
         if len(parameters_str) > 0:
-           return f"{self.get_description()} Parameters: {parameters_str}"
+            return f"{self.get_description()} Parameters: {parameters_str}"
         return f"f{self.get_description()}, no parameters"
 
     @abstractmethod
-    def get_parameters(self) -> Dict[str,ParameterDefine]:
+    def get_parameters(self) -> Dict[str, ParameterDefine]:
         pass
 
     def get_openai_parameters(self) -> Dict:
@@ -131,9 +132,9 @@ class AIFunction:
             result["type"] = "object"
             required = []
             parm_defines = {}
-            for parm_name,parm in parameters.items():
+            for parm_name, parm in parameters.items():
                 parm_item = {}
-                parm_item["type"] = parm.type 
+                parm_item["type"] = parm.type
                 parm_item["description"] = parm.description
                 if parm.enum is not None:
                     parm_item["enum"] = parm.enum
@@ -143,11 +144,11 @@ class AIFunction:
             result["properties"] = parm_defines
             result["required"] = required
             return result
-        
+
         return {"type": "object", "properties": {}}
-    
+
     @abstractmethod
-    async def execute(self, arguments:Dict) -> str:
+    async def execute(self, arguments: Dict) -> str:
         """
         Execute the function and return a JSON serializable dict by LLM
         The parameters are passed in the form of kwargs
@@ -178,19 +179,20 @@ class AIFunction:
         """
         pass
 
-    @abstractmethod  
+    @abstractmethod
     def is_ready_only(self) -> bool:
         pass
 
-#TODO need to be upgrade
-class ActionNode:
-    def __init__(self,name:str,args:List[str]) -> None:
-        self.name:str= name
-        self.args:List[str]= args
-        self.body:str = None
-        self.parms : Dict = None
 
-    def append_body(self,body:str) -> None:
+# TODO need to be upgrade
+class ActionNode:
+    def __init__(self, name: str, args: List[str]) -> None:
+        self.name: str = name
+        self.args: List[str] = args
+        self.body: str = None
+        self.parms: Dict = None
+
+    def append_body(self, body: str) -> None:
         if self.body is None:
             self.body = body
         else:
@@ -200,39 +202,40 @@ class ActionNode:
         pass
 
     @classmethod
-    def from_json(cls,json_obj:dict) -> 'ActionNode':
-        args = json_obj.get("args",[])
-        r = ActionNode(json_obj["name"],args)
+    def from_json(cls, json_obj: dict) -> 'ActionNode':
+        args = json_obj.get("args", [])
+        r = ActionNode(json_obj["name"], args)
         if json_obj.get("body"):
             r.body = json_obj["body"]
         r.parms = json_obj
 
         return r
-    
+
 
 class SimpleAIFunction(AIFunction):
-    def __init__(self,func_id:str,description:str,func_handler:Coroutine,parameters:Dict[str,ParameterDefine] = None) -> None:
+    def __init__(self, func_id: str, description: str, func_handler: Coroutine,
+                 parameters: Dict[str, ParameterDefine] = None) -> None:
         self.func_id = func_id
         self.description = description
         self.func_handler = func_handler
-        self.parameters:Dict[str,ParameterDefine] = parameters
+        self.parameters: Dict[str, ParameterDefine] = parameters
 
-    def get_id(self) -> str: 
+    def get_id(self) -> str:
         return self.func_id
-    
+
     def get_name(self) -> str:
         return self.func_id.split('.')[-1].strip()
-    
+
     def get_description(self) -> str:
         return self.description
-    
-    def get_parameters(self) -> Dict[str,ParameterDefine]:
+
+    def get_parameters(self) -> Dict[str, ParameterDefine]:
         return self.parameters
-    
-    async def execute(self,parameters:Dict) -> str:
+
+    async def execute(self, parameters: Dict) -> str:
         if self.func_handler is None:
             return f"error: function {self.func_id} not implemented"
-        
+
         return await self.func_handler(parameters)
 
     def is_local(self) -> bool:
@@ -240,9 +243,10 @@ class SimpleAIFunction(AIFunction):
 
     def is_in_zone(self) -> bool:
         return True
-    
+
     def is_ready_only(self) -> bool:
         return False
+
 
 class AIAction:
     @abstractmethod
@@ -252,9 +256,8 @@ class AIAction:
         """
         pass
 
-    def get_name(self)->str:
+    def get_name(self) -> str:
         return self.get_id().split('.')[-1].strip()
-        
 
     @abstractmethod
     def get_description(self) -> str:
@@ -262,7 +265,6 @@ class AIAction:
         return a detailed description of what the operation does
         """
         pass
-
 
     @abstractmethod
     async def execute(self, params: dict) -> str:
@@ -272,24 +274,25 @@ class AIAction:
         """
         pass
 
+
 class SimpleAIAction(AIAction):
-    def __init__(self,op:str,description:str,func_handler:Coroutine) -> None:
+    def __init__(self, op: str, description: str, func_handler: Coroutine) -> None:
         self.op = op
         self.description = description
         self.func_handler = func_handler
 
-    def get_id(self) -> str: 
+    def get_id(self) -> str:
         return self.op
 
     def get_description(self) -> str:
         return self.description
-    
+
     async def execute(self, params: Dict) -> str:
         if self.func_handler is None:
             return "error: function not implemented"
-        
+
         return await self.func_handler(params)
-    
+
 
 class AIFunction2Action(AIAction):
     def __init__(self, func: AIFunction) -> None:

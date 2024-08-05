@@ -5,7 +5,7 @@ import os
 import aiofiles
 import sqlite3
 import asyncio
-from typing import Any,List,Dict
+from typing import Any, List, Dict
 import chardet
 
 from ..proto.agent_task import *
@@ -13,15 +13,16 @@ from ..proto.ai_function import *
 from ..proto.compute_task import *
 from ..agent.agent_base import *
 
-from ..storage.storage import AIStorage,ResourceLocation
+from ..storage.storage import AIStorage, ResourceLocation
 from .environment import SimpleEnvironment, CompositeEnvironment
 
-
 logger = logging.getLogger(__name__)
+
 
 class TodoListType:
     TO_WORK = "work"
     TO_LEARN = "learn"
+
 
 class TodoListEnvironment(SimpleEnvironment):
     def __init__(self, workspace, list_type) -> None:
@@ -47,67 +48,65 @@ class TodoListEnvironment(SimpleEnvironment):
         ''')
         self.conn.commit()
 
-        async def create_todo(params):  
+        async def create_todo(params):
             todoObj = AgentTodo.from_dict(params["todo"])
             parent_id = params.get("parent")
-            return await self.create_todo(parent_id,todoObj)
-        
+            return await self.create_todo(parent_id, todoObj)
+
         self.add_ai_operation(SimpleAIAction(
             op="create_todo",
             description="create todo",
             func_handler=create_todo,
         ))
 
-
         async def update_todo(params):
             todo_id = params["id"]
             new_stat = params["state"]
-            return await self.update_todo(todo_id,new_stat)
-        
+            return await self.update_todo(todo_id, new_stat)
+
         self.add_ai_operation(SimpleAIAction(
             op="update_todo",
             description="update todo",
             func_handler=update_todo,
         ))
 
-    def _get_todo_path(self,todo_id:str) -> str:
+    def _get_todo_path(self, todo_id: str) -> str:
         cursor = self.conn.cursor()
         cursor.execute('''
             SELECT path FROM todo_list WHERE id = ?
-        ''',(todo_id,))
+        ''', (todo_id,))
         row = cursor.fetchone()
         if row:
             return row[0]
         else:
             return None
 
-    def _save_todo_path(self,todo_id:str,path:str):
+    def _save_todo_path(self, todo_id: str, path: str):
         cursor = self.conn.cursor()
         cursor.execute('''
             INSERT INTO todo_list (id,path) VALUES (?,?)
-        ''',(todo_id,path))
+        ''', (todo_id, path))
         self.conn.commit()
- 
+
     # Task/todo system , create,update,delete,query
-    async def get_todo_tree(self,path:str = None,deep:int = 4):
+    async def get_todo_tree(self, path: str = None, deep: int = 4):
         if path:
             directory_path = os.path.join(self.root_path, path)
         else:
             directory_path = self.root_path
 
-        
-        str_result:str = "/todos\n"
-        todo_count:int = 0 
+        str_result: str = "/todos\n"
+        todo_count: int = 0
 
-        async def scan_dir(directory_path:str,deep:int):
+        async def scan_dir(directory_path: str, deep: int):
             nonlocal str_result
             nonlocal todo_count
             if deep <= 0:
                 return
-            
+
             if os.path.exists(directory_path) is False:
-                return 
-            
+                return
+
             for entry in os.scandir(directory_path):
                 is_dir = entry.is_dir()
                 if not is_dir:
@@ -115,27 +114,27 @@ class TodoListEnvironment(SimpleEnvironment):
 
                 if entry.name.startswith("."):
                     continue
-                
-                todo_count = todo_count +  1
-                str_result = str_result + f"{'  '*(4-deep)}{entry.name}\n"
-                await scan_dir(entry.path,deep-1)
 
-        await scan_dir(directory_path,deep)
-        return str_result,todo_count
+                todo_count = todo_count + 1
+                str_result = str_result + f"{'  ' * (4 - deep)}{entry.name}\n"
+                await scan_dir(entry.path, deep - 1)
 
-    async def get_todo_list(self,agent_id:str,path:str = None)->List[AgentTodo]:
-        logger.info("get_todo_list:%s,%s",agent_id,path)
+        await scan_dir(directory_path, deep)
+        return str_result, todo_count
+
+    async def get_todo_list(self, agent_id: str, path: str = None) -> List[AgentTodo]:
+        logger.info("get_todo_list:%s,%s", agent_id, path)
         if path:
             directory_path = os.path.join(self.root_path, path)
         else:
             directory_path = self.root_path
 
-        result_list:List[AgentTodo] = []
+        result_list: List[AgentTodo] = []
 
-        async def scan_dir(directory_path:str,deep:int,parent:AgentTodo=None):
+        async def scan_dir(directory_path: str, deep: int, parent: AgentTodo = None):
             nonlocal result_list
             if os.path.exists(directory_path) is False:
-                return 
+                return
 
             for entry in os.scandir(directory_path):
                 is_dir = entry.is_dir()
@@ -144,51 +143,50 @@ class TodoListEnvironment(SimpleEnvironment):
 
                 if entry.name.startswith("."):
                     continue
-                
+
                 todo = await self.get_todo_by_fullpath(entry.path)
                 if todo:
                     if todo.worker:
                         if todo.worker != agent_id:
                             continue
-                        
+
                     if parent:
                         parent.sub_todos[todo.todo_id] = todo
-                    
-                    result_list.append(todo)
-                    todo.rank = int(todo.create_time)>>deep
-                    await scan_dir(entry.path,deep + 1,todo)
-            
-            return 
 
-        await scan_dir(directory_path,0) 
-        #sort by rank
-        result_list.sort(key=lambda x:(x.rank,x.title))
-        logger.info("get_todo_list return,todolist.length() is %d",len(result_list))
+                    result_list.append(todo)
+                    todo.rank = int(todo.create_time) >> deep
+                    await scan_dir(entry.path, deep + 1, todo)
+
+            return
+
+        await scan_dir(directory_path, 0)
+        # sort by rank
+        result_list.sort(key=lambda x: (x.rank, x.title))
+        logger.info("get_todo_list return,todolist.length() is %d", len(result_list))
         return result_list
 
-    async def get_todo_by_fullpath(self,path:str) -> AgentTodo:
-        logger.info("get_todo_by_fullpath:%s",path)
+    async def get_todo_by_fullpath(self, path: str) -> AgentTodo:
+        logger.info("get_todo_by_fullpath:%s", path)
 
         detail_path = path + "/detail"
         try:
             with open(detail_path, mode='r', encoding="utf-8") as f:
                 todo_dict = json.load(f)
-                result_todo =  AgentTodo.from_dict(todo_dict)
+                result_todo = AgentTodo.from_dict(todo_dict)
                 if result_todo:
                     relative_path = os.path.relpath(path, self.root_path)
                     if not relative_path.startswith('/'):
                         relative_path = '/' + relative_path
                     result_todo.todo_path = relative_path
                 else:
-                    logger.error("get_todo_by_path:%s,parse failed!",path)
-                
+                    logger.error("get_todo_by_path:%s,parse failed!", path)
+
                 return result_todo
         except Exception as e:
-            logger.error("get_todo_by_path:%s,failed:%s",path,e)
+            logger.error("get_todo_by_path:%s,failed:%s", path, e)
             return None
 
-
-    async def create_todo(self,parent_id:str,todo:AgentTodo) -> str:
+    async def create_todo(self, parent_id: str, todo: AgentTodo) -> str:
         try:
             if parent_id:
                 parent_path = self._get_todo_path(parent_id)
@@ -197,43 +195,44 @@ class TodoListEnvironment(SimpleEnvironment):
                 todo_path = f"{todo.todo_id}-{todo.title}"
 
             dir_path = f"{self.root_path}/{todo_path}"
-    
+
             os.makedirs(dir_path)
             detail_path = f"{dir_path}/detail"
             if todo.todo_path is None:
                 todo.todo_path = todo_path
-            self._save_todo_path(todo.todo_id,todo_path)
-            logger.info("create_todo %s",detail_path)
+            self._save_todo_path(todo.todo_id, todo_path)
+            logger.info("create_todo %s", detail_path)
             async with aiofiles.open(detail_path, mode='w', encoding="utf-8") as f:
-                await f.write(json.dumps(todo.to_dict(),ensure_ascii=False))
+                await f.write(json.dumps(todo.to_dict(), ensure_ascii=False))
         except Exception as e:
-            logger.error("create_todo failed:%s",e)
+            logger.error("create_todo failed:%s", e)
             return str(e)
-        
+
         return None
 
-    async def update_todo(self,todo_id:str,new_stat:str)->str:
+    async def update_todo(self, todo_id: str, new_stat: str) -> str:
         try:
             todo_path = self._get_todo_path(todo_id)
             full_path = f"{self.root_path}/{todo_path}"
-            todo : AgentTodo = await self.get_todo_by_fullpath(full_path)
+            todo: AgentTodo = await self.get_todo_by_fullpath(full_path)
             if todo:
                 todo.state = new_stat
-                detail_path =  f"{full_path}/detail"
+                detail_path = f"{full_path}/detail"
                 async with aiofiles.open(detail_path, mode='w', encoding="utf-8") as f:
-                    await f.write(json.dumps(todo.to_dict()),ensure_ascii=False)
+                    await f.write(json.dumps(todo.to_dict()), ensure_ascii=False)
                     return None
             else:
                 return "todo not found."
         except Exception as e:
             return str(e)
-    
-    async def wait_todo_done(self,todo_id:str,state=AgentTodoState.TODO_STATE_EXEC_OK) -> AgentTodo:
+
+    async def wait_todo_done(self, todo_id: str, state=AgentTodoState.TODO_STATE_EXEC_OK) -> AgentTodo:
         todo_path = self._get_todo_path(todo_id)
         full_path = f"{self.root_path}/{todo_path}"
+
         async def check_done():
             while True:
-                todo : AgentTodo = await self.get_todo_by_fullpath(full_path)
+                todo: AgentTodo = await self.get_todo_by_fullpath(full_path)
                 if todo is None:
                     continue
                 if todo.state == AgentTodo.TODO_STATE_CANCEL:
@@ -251,11 +250,10 @@ class TodoListEnvironment(SimpleEnvironment):
                 elif todo.state == AgentTodo.TODO_STATE_REVIEWED:
                     break
                 await asyncio.sleep(1)
-        
+
         await check_done()
         return await self.get_todo_by_fullpath(full_path)
-        
-    
+
     # async def append_worklog(self, todo:AgentTodo, result:AgentTodoResult):
     #     worklog = f"{self.root_path}/{todo.todo_path}/.worklog"
 
@@ -275,7 +273,7 @@ class TodoListEnvironment(SimpleEnvironment):
 
 class WorkspaceEnvironment(CompositeEnvironment):
     def __init__(self, env_id: str) -> None:
-        myai_path = AIStorage.get_instance().get_myai_dir() 
+        myai_path = AIStorage.get_instance().get_myai_dir()
         root_path = f"{myai_path}/workspace/{env_id}"
         super().__init__(root_path)
 
@@ -284,30 +282,30 @@ class WorkspaceEnvironment(CompositeEnvironment):
             os.makedirs()
 
         self.todo_list: Dict[str, TodoListEnvironment] = {}
-        self.todo_list[TodoListType.TO_WORK] = TodoListEnvironment(self.root_path,TodoListType.TO_WORK)
-        self.todo_list[TodoListType.TO_LEARN] = TodoListEnvironment(self.root_path,TodoListType.TO_LEARN)
+        self.todo_list[TodoListType.TO_WORK] = TodoListEnvironment(self.root_path, TodoListType.TO_WORK)
+        self.todo_list[TodoListType.TO_LEARN] = TodoListEnvironment(self.root_path, TodoListType.TO_LEARN)
 
         # default environments in workspace
         self.add_env(self.todo_list[TodoListType.TO_WORK])
 
-    def set_root_path(self,path:str):
+    def set_root_path(self, path: str):
         self.root_path = path
 
     def get_prompt(self) -> AgentMsg:
         return None
-    
-    def get_role_prompt(self,role_id:str) -> LLMPrompt:
+
+    def get_role_prompt(self, role_id: str) -> LLMPrompt:
         return None
 
-    def get_do_prompt(self,todo:AgentTodo=None)->LLMPrompt:
+    def get_do_prompt(self, todo: AgentTodo = None) -> LLMPrompt:
         return None
 
     # result mean: list[op_error_str],have_error
-    async def exec_op_list(self,oplist:List,agent_id:str)->tuple[List[str],bool]:
+    async def exec_op_list(self, oplist: List, agent_id: str) -> tuple[List[str], bool]:
         result_str = "op list is none"
         if oplist is None or len(oplist) == 0:
-            return None,False
-        
+            return None, False
+
         result_str = []
         have_error = False
         for op in oplist:
@@ -322,7 +320,6 @@ class WorkspaceEnvironment(CompositeEnvironment):
                 have_error = True
                 result_str.append(error_str)
             else:
-                result_str.append(f"execute success!")  
-    
-        return result_str,have_error
-        
+                result_str.append(f"execute success!")
+
+        return result_str, have_error

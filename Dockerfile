@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     	default-libmysqlclient-dev \
     	build-essential \
     	pkg-config \
-        && rm -rf /var/lib/apt/lists/* \
+        && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/aios
 COPY ./src /opt/aios
@@ -19,7 +19,6 @@ RUN mkdir -p /root/myai/etc
 
 RUN pip install --no-cache-dir -r /opt/aios/requirements.txt
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-CMD ["python3","./service/aios_shell/aios_shell.py"]
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+CMD ["python3", "./service/aios_shell/aios_shell.py"]

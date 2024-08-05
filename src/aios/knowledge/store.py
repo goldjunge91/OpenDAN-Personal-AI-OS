@@ -7,6 +7,7 @@ from .core_object import DocumentObject, ImageObject, VideoObject, RichTextObjec
 from .data import ChunkStore, ChunkTracker, ChunkListWriter, ChunkReader
 from ..storage.storage import AIStorage
 
+
 # KnowledgeStore class, which aggregates ChunkStore, ChunkTracker, and ObjectStore, and is a global singleton that makes it easy to use these three built-in store examples
 class KnowledgeStore:
     _instance = None
@@ -14,7 +15,7 @@ class KnowledgeStore:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            
+
             knowledge_dir = f"{AIStorage.get_instance().get_myai_dir()}/knowledge/objects"
 
             if not os.path.exists(knowledge_dir):
@@ -41,7 +42,6 @@ class KnowledgeStore:
         self.chunk_list_writer = ChunkListWriter(self.chunk_store, self.chunk_tracker)
         self.chunk_reader = ChunkReader(self.chunk_store, self.chunk_tracker)
 
-    
     def get_relation_store(self) -> ObjectRelationStore:
         return self.relation_store
 
@@ -53,16 +53,16 @@ class KnowledgeStore:
 
     def get_chunk_tracker(self) -> ChunkTracker:
         return self.chunk_tracker
-    
+
     def get_chunk_list_writer(self) -> ChunkListWriter:
         return self.chunk_list_writer
-    
+
     def get_chunk_reader(self) -> ChunkReader:
         return self.chunk_reader
-    
+
     async def insert_object(self, object: KnowledgeObject):
         self.object_store.put_object(object.calculate_id(), object.encode())
-    
+
     def load_object(self, object_id: ObjectID) -> KnowledgeObject:
         if object_id.get_object_type() == ObjectType.Document:
             return DocumentObject.decode(self.object_store.get_object(object_id))
@@ -76,7 +76,7 @@ class KnowledgeStore:
             return EmailObject.decode(self.object_store.get_object(object_id))
         else:
             pass
-    
+
     def parse_object_in_message(self, message: str) -> KnowledgeObject:
         # get message's first line 
         logging.info(f"tg parse resp message: {message}")
@@ -91,11 +91,10 @@ class KnowledgeStore:
                     object_id = desc[0]["id"]
             except Exception as e:
                 return None
-            
+
             if object_id is not None:
                 return self.load_object(ObjectID.from_base58(object_id))
-            
-            
+
     def bytes_from_object(self, object: KnowledgeObject) -> bytes:
         if object.get_object_type() == ObjectType.Image:
             image_object = object

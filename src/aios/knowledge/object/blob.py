@@ -2,6 +2,7 @@ import os
 import shutil
 from .object import ObjectID
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +23,7 @@ class FileBlobStorage:
 
         if os.name == "nt":  # Windows
             if second in ["con", "aux", "nul", "prn"]:
-                second = tmp[-(len + 1) :]
+                second = tmp[-(len + 1):]
             if first in ["con", "aux", "nul", "prn"]:
                 first = f"{first}_"
 
@@ -42,14 +43,14 @@ class FileBlobStorage:
         full_path = self.get_full_path(object_id)
         if os.path.exists(full_path):
             logger.warning(f"will replace object: {object_id}")
-            
+
         self.write_sync(full_path, contents)
 
     def get(self, object_id: ObjectID) -> bytes:
         full_path = self.get_full_path(object_id)
         if not os.path.exists(full_path):
             return None
-        
+
         with open(full_path, "rb") as f:
             return f.read()
 

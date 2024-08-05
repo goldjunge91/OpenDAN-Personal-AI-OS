@@ -2,7 +2,8 @@
 from datetime import datetime
 import asyncio
 import json
-import sqlite3 # Because sqlite3 IO operation is small, so we can use sqlite3 directly.(so we don't need to use async sqlite3 now)
+import \
+    sqlite3  # Because sqlite3 IO operation is small, so we can use sqlite3 directly.(so we don't need to use async sqlite3 now)
 from sqlite3 import Error
 import threading
 import logging
@@ -13,7 +14,7 @@ from ..agent.llm_context import GlobaToolsLibrary
 from ..proto.compute_task import *
 from ..proto.ai_function import *
 from ..frame.compute_kernel import ComputeKernel
-from ..frame.contact_manager import ContactManager,Contact
+from ..frame.contact_manager import ContactManager, Contact
 from ..storage.storage import AIStorage
 
 from .environment import SimpleEnvironment, CompositeEnvironment
@@ -22,14 +23,16 @@ from ..ai_functions.image_2_text_function import Image2TextFunction
 
 logger = logging.getLogger(__name__)
 
+
 class CalenderEvent(SimpleEnvironment):
-    def __init__(self,data) -> None:
+    def __init__(self, data) -> None:
         super().__init__()
         self.event_name = "timer"
         self.data = data
 
     def display(self) -> str:
         return f"#event timer:{self.data}"
+
 
 # AI Calender GOAL: Let user use "create notify after 2 days" to create a timer event
 class CalenderEnvironment(SimpleEnvironment):
@@ -40,16 +43,16 @@ class CalenderEnvironment(SimpleEnvironment):
         gl = GlobaToolsLibrary.get_instance()
 
         gl.register_tool_function(SimpleAIFunction("system.now",
-                                        "get current time",
-                                        self._get_now))
-        
+                                                   "get current time",
+                                                   self._get_now))
+
         get_param = ParameterDefine.create_parameters({
             "start_time": "start time (UTC) of event",
             "end_time": "end time (UTC) of event"
         })
         gl.register_tool_function(SimpleAIFunction("system.calender.get_events",
-                                              "get events in calender by time range",
-                                              self._get_events_by_time_range,get_param))
+                                                   "get events in calender by time range",
+                                                   self._get_events_by_time_range, get_param))
 
         add_param = ParameterDefine.create_parameters({
             "title": "title of event",
@@ -60,15 +63,15 @@ class CalenderEnvironment(SimpleEnvironment):
             "details": "details of event"
         })
         gl.register_tool_function(SimpleAIFunction("system.calender.add_event",
-                                        "add event to calender",
-                                        self._add_event,add_param))
+                                                   "add event to calender",
+                                                   self._add_event, add_param))
 
         delete_param = ParameterDefine.create_parameters({
             "event_id": "id of event"
         })
         gl.register_tool_function(SimpleAIFunction("system.calender.delete_event",
-                                        "delete event from calender",
-                                        self._delete_event,delete_param))
+                                                   "delete event from calender",
+                                                   self._delete_event, delete_param))
 
         update_param = ParameterDefine.create_parameters({
             "event_id": "id of event",
@@ -80,9 +83,8 @@ class CalenderEnvironment(SimpleEnvironment):
             "end_time": "new end time (UTC) of event"
         })
         gl.register_tool_function(SimpleAIFunction("system.calender.update_event",
-                                        "update event in calender",
-                                        self._update_event,update_param))
-
+                                                   "update event in calender",
+                                                   self._update_event, update_param))
 
     async def init_db(self):
         async with aiosqlite.connect(self.db_file) as db:
@@ -99,7 +101,7 @@ class CalenderEnvironment(SimpleEnvironment):
             """)
             await db.commit()
 
-    async def _add_event(self,title, start_time, end_time, participants=None, location=None, details=None):
+    async def _add_event(self, title, start_time, end_time, participants=None, location=None, details=None):
         async with aiosqlite.connect(self.db_file) as db:
             await db.execute("""
                 INSERT INTO events (title, start_time, end_time, participants, location, details)
@@ -108,7 +110,7 @@ class CalenderEnvironment(SimpleEnvironment):
             await db.commit()
             return f"execute add_event OK,event '{title}' already add to calender!"
 
-    async def _search_events(self,query):
+    async def _search_events(self, query):
         async with aiosqlite.connect(self.db_file) as db:
             cursor = await db.execute("""
                 SELECT id,title, start_time, end_time, participants, location, details FROM events
@@ -126,9 +128,9 @@ class CalenderEnvironment(SimpleEnvironment):
                 _event["location"] = row[5]
                 _event["details"] = row[6]
                 result[row[0]] = _event
-            return json.dumps(result, indent=4, sort_keys=True,ensure_ascii=False)
+            return json.dumps(result, indent=4, sort_keys=True, ensure_ascii=False)
 
-    async def _get_events_by_time_range(self,start_time, end_time):
+    async def _get_events_by_time_range(self, start_time, end_time):
         async with aiosqlite.connect(self.db_file) as db:
             cursor = await db.execute("""
                 SELECT id,title, start_time, end_time, participants, location, details FROM events
@@ -152,9 +154,10 @@ class CalenderEnvironment(SimpleEnvironment):
             if not have_result:
                 return "No event."
 
-            return json.dumps(result, indent=4, sort_keys=True,ensure_ascii=False)
+            return json.dumps(result, indent=4, sort_keys=True, ensure_ascii=False)
 
-    async def _update_event(self,event_id, new_title=None, new_participants=None, new_location=None, new_details=None ,start_time=None, end_time=None):
+    async def _update_event(self, event_id, new_title=None, new_participants=None, new_location=None, new_details=None,
+                            start_time=None, end_time=None):
         fields_to_update = []
         values = []
 
@@ -198,7 +201,7 @@ class CalenderEnvironment(SimpleEnvironment):
             await db.commit()
             return "update ok"
 
-    async def _delete_event(self,event_id):
+    async def _delete_event(self, event_id):
         async with aiosqlite.connect(self.db_file) as db:
             await db.execute("""
                 DELETE FROM events
@@ -207,19 +210,19 @@ class CalenderEnvironment(SimpleEnvironment):
             await db.commit()
             return "Delete event ok"
 
-    def _do_get_value(self,key:str) -> Optional[str]:
+    def _do_get_value(self, key: str) -> Optional[str]:
         return None
 
-    async def _get_contact(self,name:str) -> str:
+    async def _get_contact(self, name: str) -> str:
         cm = ContactManager.get_instance()
-        contact : Contact = cm.find_contact_by_name(name)
+        contact: Contact = cm.find_contact_by_name(name)
         if contact:
-            s = json.dumps(contact.to_dict(),ensure_ascii=False)
+            s = json.dumps(contact.to_dict(), ensure_ascii=False)
             return f"Execute get_contact OK , contact {name} is {s}"
         else:
             return f"Execute get_contact OK , contact {name} not found!"
 
-    async def _set_contact(self,name:str,contact_info:str) -> str:
+    async def _set_contact(self, name: str, contact_info: str) -> str:
         cm = ContactManager.get_instance()
         contact = cm.find_contact_by_name(name)
         contact_info = json.loads(contact_info)
@@ -230,7 +233,7 @@ class CalenderEnvironment(SimpleEnvironment):
             contact.notes = contact_info.get("notes")
             contact.added_by = self.env_id
 
-            cm.add_contact(name,contact)
+            cm.add_contact(name, contact)
 
             return f"Execute set_contact OK , new contact {name} added!"
         else:
@@ -242,7 +245,7 @@ class CalenderEnvironment(SimpleEnvironment):
                 contact.notes = contact_info.get("notes")
 
             contact.added_by = self.env_id
-            cm.set_contact(name,contact)
+            cm.set_contact(name, contact)
 
             return f"Execute set_contact OK , contact {name} updated!"
 
@@ -252,7 +255,8 @@ class CalenderEnvironment(SimpleEnvironment):
         self.is_run = True
         await self.init_db()
 
-        self.register_get_handler("now",self.get_now)
+        self.register_get_handler("now", self.get_now)
+
         async def timer_loop():
             while True:
                 if self.is_run == False:
@@ -261,8 +265,8 @@ class CalenderEnvironment(SimpleEnvironment):
                 await asyncio.sleep(1.0)
                 now = datetime.now()
                 formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
-                env_event:CalenderEvent = CalenderEvent(formatted_time)
-                await self.fire_event("timer",env_event)
+                env_event: CalenderEvent = CalenderEvent(formatted_time)
+                await self.fire_event("timer", env_event)
 
             return
 
@@ -271,7 +275,7 @@ class CalenderEnvironment(SimpleEnvironment):
     def stop(self):
         self.is_run = False
 
-    def get_now(self)->str:
+    def get_now(self) -> str:
         now = datetime.now()
         formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
         return formatted_time
@@ -281,8 +285,7 @@ class CalenderEnvironment(SimpleEnvironment):
         formatted_time = now.strftime('%Y-%m-%d %H:%M:%S')
         return formatted_time
 
-
-    async def _paint(self, prompt, model_name = None) -> str:
+    async def _paint(self, prompt, model_name=None) -> str:
         result = await ComputeKernel.get_instance().do_text_2_image(prompt, model_name)
         if result.result_code == ComputeTaskResultCode.ERROR:
             return f"exec paint failed. err:{result.error_str}"
@@ -294,22 +297,18 @@ class PaintEnvironment(SimpleEnvironment):
     def __init__(self, env_id: str) -> None:
         super().__init__(env_id)
 
-    
-
-    
     def register_functions(self):
         paint_param = ParameterDefine.create_parameters({
             "prompt": "Description of the content of the painting",
         })
         GlobaToolsLibrary.get_instance().register_tool_function(SimpleAIFunction("aigc.text_2_image",
-                                        "Draw a picture according to the description",
-                                        self._paint,paint_param))
+                                                                                 "Draw a picture according to the description",
+                                                                                 self._paint, paint_param))
 
-    def _do_get_value(self,key:str) -> Optional[str]:
+    def _do_get_value(self, key: str) -> Optional[str]:
         return None
 
-
-    async def _paint(self, prompt, model_name = None, negative_prompt = None) -> str:
+    async def _paint(self, prompt, model_name=None, negative_prompt=None) -> str:
         result = await ComputeKernel.get_instance().do_text_2_image(prompt, model_name, negative_prompt)
         if result.result_code == ComputeTaskResultCode.ERROR:
             return f"exec paint failed. err:{result.error_str}"
@@ -319,14 +318,13 @@ class PaintEnvironment(SimpleEnvironment):
 
 # Default Workflow Environment(Context)
 class WorkflowEnvironment(CompositeEnvironment):
-    def __init__(self, env_id: str,db_file:str) -> None:
+    def __init__(self, env_id: str, db_file: str) -> None:
         super().__init__(env_id)
         self.db_file = db_file
         self.local = threading.local()
         self.table_name = "WorkflowEnv_" + env_id
         # self.add_ai_function(ScriptToSpeechFunction())
         # self.add_ai_function(Image2TextFunction())
-
 
     def _get_conn(self):
         """ get db connection """
@@ -372,7 +370,7 @@ class WorkflowEnvironment(CompositeEnvironment):
         try:
             conn = self._get_conn()
             c = conn.cursor()
-            c.execute("SELECT EnvValue FROM " + self.table_name +" WHERE EnvKey = ?", (key,))
+            c.execute("SELECT EnvValue FROM " + self.table_name + " WHERE EnvKey = ?", (key,))
             value = c.fetchone()
             if value is None:
                 return None
@@ -381,15 +379,15 @@ class WorkflowEnvironment(CompositeEnvironment):
             logging.error(f"Error occurred while _do_get_value{key}: {e}")
             return None
 
-    def set_value(self, key: str, str_value: str, is_storage:bool=True):
-        super().set_value(key,str_value)
+    def set_value(self, key: str, str_value: str, is_storage: bool = True):
+        super().set_value(key, str_value)
         if is_storage is False:
             return
 
         try:
             conn = self._get_conn()
             conn.execute("""
-                INSERT OR REPLACE INTO """ + self.table_name+ """ (EnvKey, EnvValue, UpdateTime)
+                INSERT OR REPLACE INTO """ + self.table_name + """ (EnvKey, EnvValue, UpdateTime)
                 VALUES (?, ?, ?) 
             """, (key, str_value, datetime.now()))
             conn.commit()

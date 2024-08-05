@@ -1,12 +1,12 @@
-
 import asyncio
 from asyncio import Queue
 import logging
 from abc import abstractmethod
 
-from aios import ComputeTask, ComputeNode,ComputeTaskResult, ComputeTaskResultCode, ComputeTaskState, ComputeTaskType
+from aios import ComputeTask, ComputeNode, ComputeTaskResult, ComputeTaskResultCode, ComputeTaskState, ComputeTaskType
 
 logger = logging.getLogger(__name__)
+
 
 class Queue_ComputeNode(ComputeNode):
     def __init__(self):
@@ -15,7 +15,7 @@ class Queue_ComputeNode(ComputeNode):
         self.is_start = False
 
     @abstractmethod
-    async def execute_task(self, task: ComputeTask)->ComputeTaskResult:
+    async def execute_task(self, task: ComputeTask) -> ComputeTaskResult:
         pass
 
     async def push_task(self, task: ComputeTask, proiority: int = 0):
@@ -57,7 +57,6 @@ class Queue_ComputeNode(ComputeNode):
                 await self._run_task(task)
 
         asyncio.create_task(_run_task_loop())
-
 
     def get_task_state(self, task_id: str):
         pass

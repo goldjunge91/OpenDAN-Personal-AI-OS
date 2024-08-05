@@ -7,17 +7,18 @@ from .bus import AIBus
 
 logger = logging.getLogger(__name__)
 
+
 class AgentTunnel(ABC):
     _all_loader = {}
     _all_tunnels = {}
+
     @classmethod
-    def register_loader(cls,tunnel_type:str,loader:Coroutine) -> None:
+    def register_loader(cls, tunnel_type: str, loader: Coroutine) -> None:
         cls._all_loader[tunnel_type] = loader
 
-
     @classmethod
-    async def load_all_tunnels_from_config(cls,config:dict) -> None:
-        for tunnel_id,tunnel_config in config.items():
+    async def load_all_tunnels_from_config(cls, config: dict) -> None:
+        for tunnel_id, tunnel_config in config.items():
             loader = cls._all_loader.get(tunnel_config["type"])
             tid = tunnel_config.get("tunnel_id")
             if tid is not None:
@@ -31,7 +32,7 @@ class AgentTunnel(ABC):
                 tunnel = await loader(tunnel_config)
                 if tunnel is not None:
                     cls._all_tunnels[tunnel_id] = tunnel
-                    tunnel.connect_to(AIBus.get_default_bus(),tunnel.target_id)
+                    tunnel.connect_to(AIBus.get_default_bus(), tunnel.target_id)
                     await tunnel.start()
                 else:
                     logger.error(f"load tunnel {tunnel_id} failed")
@@ -39,13 +40,13 @@ class AgentTunnel(ABC):
                 logger.error(f"load tunnel {tunnel_id} failed,loader not found")
 
     @classmethod
-    async def load_tunnel_from_config(cls,tunnel_config:dict):
+    async def load_tunnel_from_config(cls, tunnel_config: dict):
         loader = cls._all_loader.get(tunnel_config["type"])
         if loader is not None:
             tunnel = await loader(tunnel_config)
             if tunnel is not None:
                 cls._all_tunnels[tunnel.tunnel_id] = tunnel
-                tunnel.connect_to(AIBus.get_default_bus(),tunnel.target_id)
+                tunnel.connect_to(AIBus.get_default_bus(), tunnel.target_id)
                 await tunnel.start()
                 return True
             else:
@@ -56,13 +57,12 @@ class AgentTunnel(ABC):
         return False
 
     @classmethod
-    async def get_tunnel_by_agentid(cls,agent_id:str):
+    async def get_tunnel_by_agentid(cls, agent_id: str):
         result = []
         for tunnel in cls._all_tunnels.values():
             if tunnel.target_id == agent_id:
                 result.append(tunnel)
         return result
-
 
     def __init__(self) -> None:
         super().__init__()
@@ -72,7 +72,7 @@ class AgentTunnel(ABC):
         self.ai_bus: AIBus = None
         self.is_connected = False
 
-    def connect_to(self, ai_bus:AIBus,target_id: str) -> None:
+    def connect_to(self, ai_bus: AIBus, target_id: str) -> None:
         """
         Connect to the agent with the given id
         """
@@ -87,7 +87,6 @@ class AgentTunnel(ABC):
     @abstractmethod
     def post_message(self, msg: AgentMsg) -> None:
         pass
-
 
     @abstractmethod
     async def start(self) -> bool:

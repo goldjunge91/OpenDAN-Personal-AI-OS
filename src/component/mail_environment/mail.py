@@ -11,7 +11,6 @@ from urllib.parse import urlparse
 from aios import *
 
 
-
 class Mail:
     def __init__(self, **kwargs) -> None:
         self.from_addr = kwargs.get("from")
@@ -29,11 +28,11 @@ class Mail:
             "id": self.id,
             "subject": self.subject,
             "from": self.from_addr,
-            "date": self.date, 
-            "content": self.content 
+            "date": self.date,
+            "content": self.content
         }
-        return json.dumps(prompt,ensure_ascii=False)
-    
+        return json.dumps(prompt, ensure_ascii=False)
+
     @classmethod
     def prompt_desc(cls) -> dict:
         return '''a mail contains following fileds: {
@@ -52,14 +51,15 @@ class Mail:
         desc = {
             "from_addr": self.from_addr,
             "to_addr": self.to_addr,
-            "subject": self.subject, 
+            "subject": self.subject,
             "date": self.date,
-            "content": self.content, 
+            "content": self.content,
             "reply_to": self.reply_to
         }
         id = str(KnowledgeObject(ObjectType.Email, desc).calculate_id())
         self.id = id
         return id
+
 
 class MailStorage:
     def __init__(self, root, watch=False):
@@ -109,7 +109,7 @@ class MailStorage:
         if row:
             return row[0]
         return None
-    
+
     def lastest_uid(self):
         cursor = self.conn.cursor()
         cursor.execute(
@@ -121,7 +121,7 @@ class MailStorage:
         if row:
             return row[0]
         return None
-    
+
     def lastest_mail_id(self):
         cursor = self.conn.cursor()
         cursor.execute(
@@ -133,7 +133,7 @@ class MailStorage:
         if row:
             return row[0]
         return None
-    
+
     def next_mail_id(self, id):
         uid = 0 if id is None else self.object_id_to_uid(id)
         cursor = self.conn.cursor()
@@ -147,8 +147,6 @@ class MailStorage:
         if row:
             return row[0]
         return None
-        
-    
 
     def get_mail_by_id(self, id):
         uid = self.object_id_to_uid(id)
@@ -164,7 +162,7 @@ class MailStorage:
 
     def mail_dir(self, uid):
         return os.path.join(self.root, str(uid))
-    
+
     # for debug
     async def watch_root(self):
         while True:
@@ -177,7 +175,7 @@ class MailStorage:
                         continue
                     mail = Mail()
                     mail_json = json.load(open(f"{mail_dir}/mail.json", "r", encoding='utf-8'))
-                    
+
                     mail.__dict__.update(mail_json)
                     # mail content
                     with open(f"{mail_dir}/mail.txt", "r", encoding='utf-8') as f:
@@ -194,9 +192,9 @@ class MailStorage:
                     )
                     self.conn.commit()
             await asyncio.sleep(10)
-    
-    def download(self, uid, parser: mailparser.MailParser, 
-                 save_image=True, 
+
+    def download(self, uid, parser: mailparser.MailParser,
+                 save_image=True,
                  from_field="From",
                  to_field="To",
                  subject_field="Subject",
@@ -219,25 +217,26 @@ class MailStorage:
         reply_to = src_meta.get(reply_to_field)
         if reply_to:
             meta["reply_to"] = self.uid_to_object_id(reply_to)
-        mail = Mail(**meta)       
-        
+        mail = Mail(**meta)
+
         h = html2text.HTML2Text()
         h.ignore_links = True
         h.ignore_images = True
-        mail_content = h.handle(parser.body)    
+        mail_content = h.handle(parser.body)
         mail.content = mail_content
-       
+
         mail.calculate_id()
         del mail.content
         json.dump(mail.__dict__, open(f"{mail_dir}/mail.json", "w", encoding='utf-8'))
-        
+
         # save mail content
         with open(f"{mail_dir}/mail.txt", "w", encoding='utf-8') as f:
             f.write(mail_content)
-        
+
         if save_image:
             for attachment in parser.attachments:
-                if attachment['mail_content_type'] in ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'image/svg']:
+                if attachment['mail_content_type'] in ['image/png', 'image/jpg', 'image/jpeg', 'image/gif',
+                                                       'image/svg']:
                     filename = attachment['filename']
                     filefullname = f"{mail_dir}/{filename}"
                     image_data = attachment['payload']
@@ -256,7 +255,7 @@ class MailStorage:
             logging.info(f'Found {len(img_urls)} images in email body')
 
             name_count = 0
-            
+
             for img_url in img_urls:
                 # keep the original image filename(last of url)
                 url_result = urlparse(img_url)
@@ -265,7 +264,7 @@ class MailStorage:
                 ext = url_result.path.split('/')[-1].split('.')[-1]
                 if ext in ['png', 'jpg', 'jpeg', 'gif', 'svg']:
                     img_filename = os.path.join(mail_dir, f"{name_count}.{ext}")
-                else :
+                else:
                     img_filename = os.path.join(mail_dir, f"{name_count}")
                 name_count += 1
                 # download image 
@@ -293,5 +292,3 @@ class MailStorage:
         self.conn.commit()
 
         return mail.id
-
-    

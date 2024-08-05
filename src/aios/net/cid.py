@@ -1,5 +1,3 @@
-
-
 class ContentId:
     def __init__(self) -> None:
         pass
@@ -8,5 +6,5 @@ class ContentId:
         pass
 
     @staticmethod
-    def create_from_str(cid_str:str):
+    def create_from_str(cid_str: str):
         pass

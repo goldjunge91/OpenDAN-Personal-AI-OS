@@ -5,6 +5,7 @@ from abc import abstractmethod
 
 from ..proto.agent_msg import AgentMsg
 
+
 class BaseAIAgent(abc.ABC):
     @abstractmethod
     def get_id(self) -> str:
@@ -19,8 +20,9 @@ class BaseAIAgent(abc.ABC):
         pass
 
     @abstractmethod
-    async def _process_msg(self,msg:AgentMsg,workspace = None) -> AgentMsg:
+    async def _process_msg(self, msg: AgentMsg, workspace=None) -> AgentMsg:
         pass
+
 
 class CustomAIAgent(BaseAIAgent):
     def __init__(self, agent_id: str, llm_model_name: str, max_token_size: int) -> None:

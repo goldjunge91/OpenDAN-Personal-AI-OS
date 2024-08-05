@@ -11,7 +11,6 @@ from ..proto.ai_function import *
 from ..frame.compute_kernel import ComputeKernel
 from ..storage.storage import AIStorage
 
-
 from pydub import AudioSegment
 
 logger = logging.getLogger(__name__)
@@ -23,26 +22,26 @@ class ScriptToSpeechFunction(AIFunction):
         self.description = "Generate audio files according to the input script, and the audio file path will be returned when successful"
         self.speech_path = os.path.join(AIStorage.get_instance().get_myai_dir(), "tts")
         self.parameters = ParameterDefine.create_parameters({
-                "language": {"type": "string", "description": "Actual language", "enum": ["zh", "en"]},
-                "model": {"type": "string", "description": "Studio", "enum": ["tts-1", "tts-1-hd"]},
-                "roles": {"type": "array", "items": {
-                    "type": "object",
-                    "properties": {
-                        "name": {"type": "string", "description": "Character name"},
-                        "gender": {"type": "string", "description": "Gender", "enum": ["man", "female"]},
-                        "age": {"type": "string", "description": "age", "enum": ["child", "adult"]},
-                    }}},
-                "lines": {"type": "array", "items": {
-                    "type": "object",
-                    "properties": {
-                        "name": {"type": "string", "description": "Character name"},
-                        "tone": {"type": "string", "description": "Sovereign emotions",
-                                 "enum": ["happy", "sad", "angry", "fear", "disgust", "surprise", "neutral"]},
-                        "text": {"type": "string", "description": "Line"},
-                    }
-                }}
-            })
-        
+            "language": {"type": "string", "description": "Actual language", "enum": ["zh", "en"]},
+            "model": {"type": "string", "description": "Studio", "enum": ["tts-1", "tts-1-hd"]},
+            "roles": {"type": "array", "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Character name"},
+                    "gender": {"type": "string", "description": "Gender", "enum": ["man", "female"]},
+                    "age": {"type": "string", "description": "age", "enum": ["child", "adult"]},
+                }}},
+            "lines": {"type": "array", "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Character name"},
+                    "tone": {"type": "string", "description": "Sovereign emotions",
+                             "enum": ["happy", "sad", "angry", "fear", "disgust", "surprise", "neutral"]},
+                    "text": {"type": "string", "description": "Line"},
+                }
+            }}
+        })
+
         Path(self.speech_path).mkdir(exist_ok=True)
 
     def get_id(self) -> str:
@@ -80,7 +79,8 @@ class ScriptToSpeechFunction(AIFunction):
             i = 0
             while i < 3:
                 try:
-                    data = await ComputeKernel.get_instance().do_text_to_speech(text, language, gender, age, name, tone, model_name=model)
+                    data = await ComputeKernel.get_instance().do_text_to_speech(text, language, gender, age, name, tone,
+                                                                                model_name=model)
                     if audio is None:
                         audio = AudioSegment.from_mp3(io.BytesIO(data))
                     else:
@@ -92,7 +92,8 @@ class ScriptToSpeechFunction(AIFunction):
                     continue
 
         if audio is not None:
-            path = os.path.join(self.speech_path, "{}.mp3".format(''.join(random.sample('zyxwvutsrqponmlkjihgfedcba', 10))))
+            path = os.path.join(self.speech_path,
+                                "{}.mp3".format(''.join(random.sample('zyxwvutsrqponmlkjihgfedcba', 10))))
             audio.export(path, format="mp3")
             return "exec script_to_speech OK，speech file store at ```{}```".format(path)
         else:
@@ -106,5 +107,3 @@ class ScriptToSpeechFunction(AIFunction):
 
     def is_ready_only(self) -> bool:
         return False
-
-

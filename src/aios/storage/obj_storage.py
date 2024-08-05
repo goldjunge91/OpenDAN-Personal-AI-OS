@@ -1,5 +1,6 @@
 from typing import List
 
+
 class NamedObjectStorage:
     def __init__(self, storage, name: str):
         self.storage = storage

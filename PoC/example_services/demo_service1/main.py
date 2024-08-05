@@ -34,7 +34,7 @@ num_output = 512
 max_chunk_overlap = 20
 # llama_index
 llm_predictor = LLMPredictor(llm=ChatOpenAI(
-    temperature=0, model_name="gpt-3.5-turbo-0301", max_tokens=num_output))
+    temperature=0, model_name="gpt-4o-mini", max_tokens=num_output))
 prompt_helper = PromptHelper(max_input_size, num_output, max_chunk_overlap)
 
 # twitter

@@ -4,10 +4,12 @@ import string
 from aios import *
 from .mail import MailStorage, Mail
 
+
 class IssueState(Enum):
     Open = 1
     InProgress = 2
     Closed = 3
+
 
 class IssueUpdateHistory:
     def __init__(self, source: str, changes: dict) -> None:
@@ -23,6 +25,7 @@ class IssueUpdateHistory:
     @classmethod
     def from_json_dict(cls, json_dict: dict) -> "IssueUpdateHistory":
         return IssueUpdateHistory(json_dict["source"], json_dict["changes"])
+
 
 class Issue:
     def __init__(self) -> None:
@@ -79,12 +82,11 @@ class Issue:
                 issue.update_history.append(history)
         return issue
 
-
     @classmethod
     def object_type(cls) -> ObjectType:
         return ObjectType.from_user_def_type_code(0)
 
-    def __to_desc(self, desc_list:[], recursion=None):
+    def __to_desc(self, desc_list: [], recursion=None):
         desc = {
             "id": self.id,
             "summary": self.summary,
@@ -106,8 +108,7 @@ class Issue:
             child = desc_list.pop()
             root["child"] = child
             root = child
-        return json.dumps(root,ensure_ascii=False)
-
+        return json.dumps(root, ensure_ascii=False)
 
     @classmethod
     def prompt_desc(cls) -> str:
@@ -134,7 +135,7 @@ class Issue:
 
 
 class IssueStorage:
-    def __init__(self, path: str, root: Issue=None) -> None:
+    def __init__(self, path: str, root: Issue = None) -> None:
         self.path = path
         if not os.path.exists(path):
             self.root = root
@@ -183,7 +184,6 @@ class IssueStorage:
                 return self.root
             this_mail = mail_storage.get_mail_by_id(this_mail.reply_to)
 
-
     def add_issue(self, source_id: str, parent_id: str, summary: str):
         parent_issue = self.get_issue_by_id(parent_id)
         issue = Issue()
@@ -230,9 +230,9 @@ class IssueParserEnvironment(SimpleEnvironment):
             "summary": '''new issue's summary''',
         }
         self.add_ai_function(SimpleAIFunction("create_issue",
-                                            create_description,
-                                            self._create,
-                                            create_param))
+                                              create_description,
+                                              self._create,
+                                              create_param))
 
         update_description = '''update an existing issue'''
         update_param = {
@@ -241,9 +241,9 @@ class IssueParserEnvironment(SimpleEnvironment):
             "summary": '''issue's new summary''',
         }
         self.add_ai_function(SimpleAIFunction("update_issue",
-                                            update_description,
-                                            self._update,
-                                            update_param))
+                                              update_description,
+                                              self._update,
+                                              update_param))
 
     async def _create(self, mail_id: str, issue_id: str, summary: str):
         issue = self.storage.add_issue(mail_id, issue_id, summary)
@@ -292,7 +292,6 @@ class IssueParser:
             child.parent = issue_id
             cls.__calac_issue_id(child)
 
-
     def get_path(self) -> str:
         return self.config["path"]
 
@@ -316,6 +315,6 @@ class IssueParser:
         prompt.append(IssueAgent(f'''Mail is {mail_str}, issue is {issue_str}. Answer me the function's return value or None if igonred.               
         '''))
 
-        llm_result = await CustomAIAgent("issue parser", "gpt-4-1106-preview", 4000).do_llm_complection(prompt, env=self.llm_env)
+        llm_result = await CustomAIAgent("issue parser", "gpt-4-1106-preview", 4000).do_llm_complection(prompt,
+                                                                                                        env=self.llm_env)
         return "update issue"
-

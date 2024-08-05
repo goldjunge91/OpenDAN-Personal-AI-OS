@@ -18,8 +18,8 @@ from jarvis.logger import logger
 
 def _generate_first_prompt():
     return """I will ask you questions or ask you to do something. You should:
-First, determine if you know the answer of the question or you can accomplish the task directly. 
-If so, response directly. 
+First, determine if you know the answer of the question or you can accomplish the task directly.
+If so, response directly.
 If not, try to complete the task by calling the functions below.
 If you can't accomplish the task by yourself and no function is able to accomplish the task, say "Dear master, sorry, I'm not able to do that."
 
@@ -244,7 +244,7 @@ class GptAgent(BaseAgent):
             current_context,
         )
 
-    async def _get_history_message_tokens(self, index, model: str = "gpt-3.5-turbo-0301") -> int:
+    async def _get_history_message_tokens(self, index, model: str = "gpt-4o-mini") -> int:
         if self._message_tokens[index] == -1:
             # since couting token is relatively slow, we store it here
             self._message_tokens[index] = await token_counter.count_message_tokens([self._full_message_history[index]], model)

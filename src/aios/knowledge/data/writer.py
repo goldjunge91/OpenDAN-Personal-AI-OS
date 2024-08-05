@@ -10,6 +10,7 @@ from ..object import HashValue
 from .tracker import ChunkTracker
 from .chunk_list import ChunkList
 
+
 def _join_docs(docs: List[str], separator: str) -> Optional[str]:
     text = separator.join(docs)
     text = text.strip()
@@ -18,13 +19,14 @@ def _join_docs(docs: List[str], separator: str) -> Optional[str]:
     else:
         return text
 
+
 def _merge_splits(
         splits: Iterable[str],
         separator: str,
         chunk_size: int,
         chunk_overlap: int,
         length_function: Callable[[str], int]
-    ) -> List[str]:
+) -> List[str]:
     # We now want to combine these smaller pieces into medium size
     # chunks to send to the LLM.
     separator_len = length_function(separator)
@@ -35,8 +37,8 @@ def _merge_splits(
     for d in splits:
         _len = length_function(d)
         if (
-            total + _len + (separator_len if len(current_doc) > 0 else 0)
-            > chunk_size
+                total + _len + (separator_len if len(current_doc) > 0 else 0)
+                > chunk_size
         ):
             if total > chunk_size:
                 logging.warning(
@@ -51,9 +53,9 @@ def _merge_splits(
                 # - we have a larger chunk than in the chunk overlap
                 # - or if we still have any chunks and the length is long
                 while total > chunk_overlap or (
-                    total + _len + (separator_len if len(current_doc) > 0 else 0)
-                    > chunk_size
-                    and total > 0
+                        total + _len + (separator_len if len(current_doc) > 0 else 0)
+                        > chunk_size
+                        and total > 0
                 ):
                     total -= length_function(current_doc[0]) + (
                         separator_len if len(current_doc) > 1 else 0
@@ -68,7 +70,7 @@ def _merge_splits(
 
 
 def _split_text_with_regex(
-    text: str, separator: str, keep_separator: bool
+        text: str, separator: str, keep_separator: bool
 ) -> List[str]:
     # Now that we have the separator, split the text
     if separator:
@@ -92,8 +94,7 @@ def split_text(
         chunk_size: int,
         chunk_overlap: int,
         length_function: Callable[[str], int]
-    ) -> List[str]:
-
+) -> List[str]:
     """Split incoming text and return chunks."""
     final_chunks = []
     # Get appropriate separator to use
@@ -106,7 +107,7 @@ def split_text(
             break
         if re.search(_separator, text):
             separator = _s
-            new_separators = separators[i + 1 :]
+            new_separators = separators[i + 1:]
             break
 
     keep_separator = True
@@ -134,16 +135,17 @@ def split_text(
         final_chunks.extend(merged_text)
     return final_chunks
 
+
 class ChunkListWriter:
     def __init__(self, chunk_store: ChunkStore, chunk_tracker: ChunkTracker):
         self.chunk_store = chunk_store
         self.chunk_tracker = chunk_tracker
 
     def create_chunk_list_from_file(
-        self, file_path: str, chunk_size: int, restore: bool
+            self, file_path: str, chunk_size: int, restore: bool
     ) -> ChunkList:
         assert (
-            chunk_size % (1024 * 1024) == 0
+                chunk_size % (1024 * 1024) == 0
         ), "chunk size should be an integral multiple of 1MB"
         chunk_list = []
         hash_obj = hashlib.sha256()
@@ -180,13 +182,13 @@ class ChunkListWriter:
         return ChunkList(chunk_list, file_hash)
 
     def create_chunk_list_from_text(
-        self,
-        text: str,
-        chunk_size: int = 4000,
-        chunk_overlap: int = 200,
-        separators: str = ["\n\n", "\n", " ", ""]
+            self,
+            text: str,
+            chunk_size: int = 4000,
+            chunk_overlap: int = 200,
+            separators: str = ["\n\n", "\n", " ", ""]
     ) -> ChunkList:
-        enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        enc = tiktoken.encoding_for_model("gpt-4o-mini")
 
         def length_function(text: str) -> int:
             return len(

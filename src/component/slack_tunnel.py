@@ -105,7 +105,6 @@ class SlackTunnel(AgentTunnel):
             video_file = None
             audio_file = None
 
-
             if "files" in event:
                 files = event["files"]
                 if files is not None and len(files) > 0:
@@ -177,10 +176,10 @@ class SlackTunnel(AgentTunnel):
                 agent_msg.body = agent_msg.create_audio_body(audio_file, content)
                 agent_msg.body_mime = mime_type
 
-
             resp_msg: AgentMsg = await self.ai_bus.send_message(agent_msg)
             if resp_msg is None:
-                await app.client.chat_postMessage(channel=event["channel"], text=f"System Error: Timeout,{self.target_id}  no resopnse! Please check logs/aios.log for more details!")
+                await app.client.chat_postMessage(channel=event["channel"],
+                                                  text=f"System Error: Timeout,{self.target_id}  no resopnse! Please check logs/aios.log for more details!")
             else:
                 if resp_msg.body_mime is None:
                     if resp_msg.body is None:
@@ -204,7 +203,7 @@ class SlackTunnel(AgentTunnel):
                     else:
                         pos = resp_msg.body.find("audio file")
                         if pos != -1:
-                            audio_file = resp_msg.body[pos+11:].strip()
+                            audio_file = resp_msg.body[pos + 11:].strip()
                             if audio_file.startswith("\""):
                                 audio_file = audio_file[1:-1]
                             await app.client.files_upload_v2(channel=event["channel"], file=audio_file)
@@ -216,13 +215,16 @@ class SlackTunnel(AgentTunnel):
                         file_uploads = []
                         for image in images:
                             file_uploads.append({"file": image})
-                        await app.client.files_upload_v2(channel=event["channel"], file_uploads=file_uploads, initial_comment=text)
+                        await app.client.files_upload_v2(channel=event["channel"], file_uploads=file_uploads,
+                                                         initial_comment=text)
                     elif resp_msg.is_video_msg():
                         text, video_file = resp_msg.get_video_body()
-                        await app.client.files_upload_v2(channel=event["channel"], file=video_file, initial_comment=text)
+                        await app.client.files_upload_v2(channel=event["channel"], file=video_file,
+                                                         initial_comment=text)
                     elif resp_msg.is_audio_msg():
                         text, audio_file = resp_msg.get_audio_body()
-                        await app.client.files_upload_v2(channel=event["channel"], file=audio_file, initial_comment=text)
+                        await app.client.files_upload_v2(channel=event["channel"], file=audio_file,
+                                                         initial_comment=text)
                     else:
                         await app.client.chat_postMessage(channel=event["channel"], text=resp_msg.body)
 

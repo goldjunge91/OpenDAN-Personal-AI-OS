@@ -13,7 +13,7 @@ from openai.cli._progress import BufferReader
 from pydub import AudioSegment
 from datetime import timedelta
 
-from aios import AIStorage,ComputeNode,ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType
+from aios import AIStorage, ComputeNode, ComputeTask, ComputeTaskResult, ComputeTaskState, ComputeTaskType
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,7 @@ SECONDS_IN_HOUR = 3600
 SECONDS_IN_MINUTE = 60
 HOURS_IN_DAY = 24
 MICROSECONDS_IN_MILLISECOND = 1000
+
 
 def timedelta_to_vtt_timestamp(timedelta_timestamp):
     hrs, secs_remainder = divmod(timedelta_timestamp.seconds, SECONDS_IN_HOUR)
@@ -58,6 +59,7 @@ class WhisperComputeNode(ComputeNode):
             logger.warn("WhisperComputeNode is already start")
             return
         self.is_start = True
+
         async def _run_task_loop():
             while True:
                 task = await self.task_queue.get()
@@ -109,11 +111,11 @@ class WhisperComputeNode(ComputeNode):
                 seg_file.seek(0)
 
                 resp = await client.audio.transcriptions.create(model="whisper-1",
-                                                   file = ("test.mp3", seg_file),
-                                                   language=language,
-                                                   temperature=temperature,
-                                                   prompt=prompt,
-                                                   response_format=response_format)
+                                                                file=("test.mp3", seg_file),
+                                                                language=language,
+                                                                temperature=temperature,
+                                                                prompt=prompt,
+                                                                response_format=response_format)
                 if response_format == "json":
                     if text == "":
                         text = resp.text
@@ -156,11 +158,11 @@ class WhisperComputeNode(ComputeNode):
                 result.result_str = text
                 result.result = text
             elif response_format == "json":
-                result.result_str = json.dumps({"text": text},ensure_ascii=False)
+                result.result_str = json.dumps({"text": text}, ensure_ascii=False)
                 resp.text = text
                 result.result = resp
             elif response_format == "verbose_json":
-                result.result_str = json.dumps({"text": text, "segments": results},ensure_ascii=False)
+                result.result_str = json.dumps({"text": text, "segments": results}, ensure_ascii=False)
                 latest_resp.text = text
                 latest_resp.segments = results
                 result.result = latest_resp
@@ -181,18 +183,18 @@ class WhisperComputeNode(ComputeNode):
                 buffer_reader = BufferReader(file_reader.read(), desc="Upload progress")
 
             resp = await client.audio.transcriptions.create(model="whisper-1",
-                                               file = (file, buffer_reader),
-                                               language=language,
-                                               temperature=temperature,
-                                               prompt=prompt,
-                                               response_format=response_format)
+                                                            file=(file, buffer_reader),
+                                                            language=language,
+                                                            temperature=temperature,
+                                                            prompt=prompt,
+                                                            response_format=response_format)
             result = ComputeTaskResult()
             result.set_from_task(task)
             result.worker_id = self.node_id
             if response_format == "json":
-                result.result_str = json.dumps({"text": resp.text},ensure_ascii=False)
+                result.result_str = json.dumps({"text": resp.text}, ensure_ascii=False)
             elif response_format == "verbose_json":
-                result.result_str = json.dumps({"text": resp.text, "segments": resp.segments},ensure_ascii=False)
+                result.result_str = json.dumps({"text": resp.text, "segments": resp.segments}, ensure_ascii=False)
             elif response_format == "srt" or response_format == "vtt" or response_format == "text":
                 result.result_str = resp
             else:

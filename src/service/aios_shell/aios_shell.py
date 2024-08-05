@@ -11,14 +11,16 @@ from logging.handlers import RotatingFileHandler
 from typing import Any, Optional, TypeVar, Tuple, Sequence
 import argparse
 
-from prompt_toolkit import HTML, PromptSession, prompt,print_formatted_text
-from prompt_toolkit.formatted_text import FormattedText
+from prompt_toolkit import HTML, PromptSession, prompt, print_formatted_text
+from prompt_toolkit import HTML, PromptSession, prompt, print_formatted_textfrom
+
+prompt_toolkit.formatted_text
+import FormattedText
 from prompt_toolkit.selection import SelectionState
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.styles import Style
-
 
 directory = os.path.dirname(__file__)
 sys.path.append(directory + '/../../')
@@ -47,22 +49,23 @@ from tg_tunnel import TelegramTunnel
 from email_tunnel import EmailTunnel
 from discord_tunnel import DiscordTunnel
 from slack_tunnel import SlackTunnel
-from common_environment import LocalKnowledgeBase, FilesystemEnvironment, ShellEnvironment, ScanLocalDocument, ParseLocalDocument
+from common_environment import LocalKnowledgeBase, FilesystemEnvironment, ShellEnvironment, ScanLocalDocument, \
+    ParseLocalDocument
 
 from compute_node_config import *
-
 
 logger = logging.getLogger(__name__)
 
 shell_style = Style.from_dict({
-    'title': '#87d7ff bold', #RGB
-    'content': '#007f00', # resp content
+    'title': '#87d7ff bold',  # RGB
+    'content': '#007f00',  # resp content
     'prompt': '#00FF00',
     'error': '#8F0000 bold'
 })
 
+
 class AIOS_Shell:
-    def __init__(self,username:str) -> None:
+    def __init__(self, username: str) -> None:
         self.username = username
         self.current_target = "_"
         self.current_topic = "default"
@@ -70,23 +73,23 @@ class AIOS_Shell:
 
     def declare_all_user_config(self):
         user_data_dir = AIStorage.get_instance().get_myai_dir()
-        contact_config_path =os.path.abspath(f"{user_data_dir}/contacts.toml")
+        contact_config_path = os.path.abspath(f"{user_data_dir}/contacts.toml")
         cm = ContactManager.get_instance(contact_config_path)
         cm.load_data()
 
         user_config = AIStorage.get_instance().get_user_config()
-        user_config.add_user_config("username","username is your full name when using AIOS",False,None)
-        user_config.add_user_config("user_telegram","Your telgram username",False,None)
-        user_config.add_user_config("user_email","Your email",False,None)
-        user_config.add_user_config("user_notes","Introduce yourself to your Agent!",False,None)
+        user_config.add_user_config("username", "username is your full name when using AIOS", False, None)
+        user_config.add_user_config("user_telegram", "Your telgram username", False, None)
+        user_config.add_user_config("user_email", "Your email", False, None)
+        user_config.add_user_config("user_notes", "Introduce yourself to your Agent!", False, None)
 
-        user_config.add_user_config("feature.llama","enable Local-llama feature",True,"False")
-        user_config.add_user_config("feature.aigc","enable AIGC feature",True,"False")
+        user_config.add_user_config("feature.llama", "enable Local-llama feature", True, "False")
+        user_config.add_user_config("feature.aigc", "enable AIGC feature", True, "False")
 
         openai_node = OpenAI_ComputeNode.get_instance()
         openai_node.declare_user_config()
 
-        user_config.add_user_config("shell.current","last opened target and topic",True,"default@Jarvis")
+        user_config.add_user_config("shell.current", "last opened target and topic", True, "default@Jarvis")
         proxy.declare_user_config()
 
         # google_text_to_speech = GoogleTextToSpeechNode.get_instance()
@@ -94,32 +97,31 @@ class AIOS_Shell:
 
         Local_Stability_ComputeNode.declare_user_config()
 
-        #Stability_ComputeNode.declare_user_config()
+        # Stability_ComputeNode.declare_user_config()
 
     def init_global_action_lib(self):
         AgentMemory.register_actions()
 
-
-    async def _handle_no_target_msg(self,bus:AIBus,target_id:str) -> bool:
-        agent : AIAgent = await AgentManager.get_instance().get(target_id)
+    async def _handle_no_target_msg(self, bus: AIBus, target_id: str) -> bool:
+        agent: AIAgent = await AgentManager.get_instance().get(target_id)
         if agent is not None:
-            bus.register_message_handler(target_id,agent._process_msg)
+            bus.register_message_handler(target_id, agent._process_msg)
             return True
 
         a_workflow = await WorkflowManager.get_instance().get_workflow(target_id)
         if a_workflow is not None:
-            bus.register_message_handler(target_id,a_workflow._process_msg)
+            bus.register_message_handler(target_id, a_workflow._process_msg)
             return True
 
         a_contact = ContactManager.get_instance().find_contact_by_name(target_id)
         if a_contact is not None:
-            bus.register_message_handler(target_id,a_contact._process_msg)
+            bus.register_message_handler(target_id, a_contact._process_msg)
             return True
 
         return False
 
-    async def is_agent(self,target_id:str) -> bool:
-        agent : AIAgent = await AgentManager.get_instance().get(target_id)
+    async def is_agent(self, target_id: str) -> bool:
+        agent: AIAgent = await AgentManager.get_instance().get(target_id)
         if agent is not None:
             return True
         else:
@@ -136,7 +138,7 @@ class AIOS_Shell:
             owner.telegram = AIStorage.get_instance().get_user_config().get_value("user_telegram")
             owner.notes = AIStorage.get_instance().get_user_config().get_value("user_notes")
 
-            cm.add_contact(self.username,owner)
+            cm.add_contact(self.username, owner)
 
         # cal_env = CalenderEnvironment("calender")
         # await cal_env.start()
@@ -148,21 +150,20 @@ class AIOS_Shell:
         # paint_env = PaintEnvironment("paint")
         # Environment.set_env_by_id("paint",paint_env)
 
-        #AgentManager.get_instance().register_environment("bash", ShellEnvironment)
-        #AgentManager.get_instance().register_environment("fs", FilesystemEnvironment)
-        #AgentManager.get_instance().register_environment("knowledge", LocalKnowledgeBase)
+        # AgentManager.get_instance().register_environment("bash", ShellEnvironment)
+        # AgentManager.get_instance().register_environment("fs", FilesystemEnvironment)
+        # AgentManager.get_instance().register_environment("knowledge", LocalKnowledgeBase)
         AgentWorkspace.register_ai_functions()
         AgentMemory.register_ai_functions()
         BaseKnowledgeGraph.register_ai_functions()
         ShellEnvironment.register_ai_functions()
-       
 
         if await AgentManager.get_instance().initial() is not True:
             logger.error("agent manager initial failed!")
             return False
         if await WorkflowManager.get_instance().initial() is not True:
-             logger.error("workflow manager initial failed!")
-             return False
+            logger.error("workflow manager initial failed!")
+            return False
 
         open_ai_node = OpenAI_ComputeNode.get_instance()
         if await open_ai_node.initial() is not True:
@@ -195,24 +196,21 @@ class AIOS_Shell:
                 ComputeKernel.get_instance().add_compute_node(llama_ai_node)
             else:
                 logger.error("llama node initial failed!")
-                await AIStorage.get_instance().set_feature_init_result("llama",False)
-
+                await AIStorage.get_instance().set_feature_init_result("llama", False)
 
         # if await AIStorage.get_instance().is_feature_enable("aigc"):
-            # try:
-            #     google_text_to_speech_node = GoogleTextToSpeechNode.get_instance()
-            #     google_text_to_speech_node.init()
-            #     ComputeKernel.get_instance().add_compute_node(google_text_to_speech_node)
-            # except Exception as e:
-            #     logger.error(f"google text to speech node initial failed! {e}")
-            #     await AIStorage.get_instance.set_feature_init_result("aigc",False)
+        # try:
+        #     google_text_to_speech_node = GoogleTextToSpeechNode.get_instance()
+        #     google_text_to_speech_node.init()
+        #     ComputeKernel.get_instance().add_compute_node(google_text_to_speech_node)
+        # except Exception as e:
+        #     logger.error(f"google text to speech node initial failed! {e}")
+        #     await AIStorage.get_instance.set_feature_init_result("aigc",False)
 
-            # stability_api_node = Stability_ComputeNode()
-            # if await stability_api_node.initial() is not True:
-            #     logger.error("stability api node initial failed!")
-            # ComputeKernel.get_instance().add_compute_node(stability_api_node)
-
-
+        # stability_api_node = Stability_ComputeNode()
+        # if await stability_api_node.initial() is not True:
+        #     logger.error("stability api node initial failed!")
+        # ComputeKernel.get_instance().add_compute_node(stability_api_node)
 
         local_st_text_compute_node = LocalSentenceTransformer_Text_ComputeNode()
         if local_st_text_compute_node.initial() is not True:
@@ -226,14 +224,13 @@ class AIOS_Shell:
         else:
             ComputeKernel.get_instance().add_compute_node(local_st_image_compute_node)
 
-
         await ComputeKernel.get_instance().start()
 
         AIBus().get_default_bus().register_unhandle_message_handler(self._handle_no_target_msg)
-        #AIBus().get_default_bus().register_message_handler(self.username,self._user_process_msg)
+        # AIBus().get_default_bus().register_message_handler(self.username,self._user_process_msg)
 
-
-        pipelines = KnowledgePipelineManager.initial(os.path.join(AIStorage().get_instance().get_myai_dir(), "knowledge/pipelines"))
+        pipelines = KnowledgePipelineManager.initial(
+            os.path.join(AIStorage().get_instance().get_myai_dir(), "knowledge/pipelines"))
         pipelines.register_input("scan_local", ScanLocalDocument)
         pipelines.register_parser("parse_local", ParseLocalDocument)
         pipelines.load_dir(os.path.join(AIStorage().get_instance().get_system_app_dir(), "knowledge_pipelines"))
@@ -254,19 +251,17 @@ class AIOS_Shell:
         except Exception as e:
             logger.warning(f"load tunnels config from {tunnels_config_path} failed! {e}")
 
-
         return True
-
 
     def get_version(self) -> str:
         return "0.5.2"
 
-    async def send_msg(self,msg:str,target_id:str,topic:str,sender:str = None, msg_mime:str=None) -> str:
+    async def send_msg(self, msg: str, target_id: str, topic: str, sender: str = None, msg_mime: str = None) -> str:
         if sender == self.username:
-            AIBus().get_default_bus().register_message_handler(self.username,self._user_process_msg)
+            AIBus().get_default_bus().register_message_handler(self.username, self._user_process_msg)
 
         agent_msg = AgentMsg()
-        agent_msg.set(sender,target_id,msg,body_mime=msg_mime)
+        agent_msg.set(sender, target_id, msg, body_mime=msg_mime)
         agent_msg.topic = topic
         resp = await AIBus.get_default_bus().send_message(agent_msg)
         if resp is not None:
@@ -277,20 +272,20 @@ class AIOS_Shell:
         else:
             return "System Error: Timeout, no resopnse! Please check logs/aios.log for more details!"
 
-    async def _user_process_msg(self,msg:AgentMsg) -> AgentMsg:
+    async def _user_process_msg(self, msg: AgentMsg) -> AgentMsg:
         pass
 
-
-    async def get_tunnel_config_from_input(self,tunnel_target,tunnel_type):
+    async def get_tunnel_config_from_input(self, tunnel_target, tunnel_type):
         tunnel_config = {}
         tunnel_config["tunnel_id"] = f"{tunnel_type}_2_{tunnel_target}"
         tunnel_config["target"] = tunnel_target
         input_table = {}
-        tunnel_introduce : str = ""
+        tunnel_introduce: str = ""
         match tunnel_type:
             case "telegram":
                 tunnel_config["type"] = "TelegramTunnel"
-                input_table["token"] = UserConfigItem("telegram bot token\n You can get it from https://t.me/BotFather ,read https://core.telegram.org/bots#how-do-i-create-a-bot for more details")
+                input_table["token"] = UserConfigItem(
+                    "telegram bot token\n You can get it from https://t.me/BotFather ,read https://core.telegram.org/bots#how-do-i-create-a-bot for more details")
                 input_table["allow"] = UserConfigItem("allow group (default is member,you can choose contact or guest)")
             case "email":
                 tunnel_config["type"] = "EmailTunnel"
@@ -301,19 +296,22 @@ class AIOS_Shell:
                 input_table["password"] = UserConfigItem("main server login password")
             case "discord":
                 tunnel_config["type"] = "DiscordTunnel"
-                input_table["token"] = UserConfigItem("discord bot token\n You can get it from https://discord.com/developers/applications ,read https://discordpy.readthedocs.io/en/stable/discord.html for more details")
+                input_table["token"] = UserConfigItem(
+                    "discord bot token\n You can get it from https://discord.com/developers/applications ,read https://discordpy.readthedocs.io/en/stable/discord.html for more details")
             case "slack":
                 tunnel_config["type"] = "SlackTunnel"
-                input_table["token"] = UserConfigItem("slack bot token\n You can get it from https://api.slack.com/apps")
-                input_table["app_token"] = UserConfigItem("slack app token\n You can get it from https://api.slack.com/apps")
+                input_table["token"] = UserConfigItem(
+                    "slack bot token\n You can get it from https://api.slack.com/apps")
+                input_table["app_token"] = UserConfigItem(
+                    "slack app token\n You can get it from https://api.slack.com/apps")
             case _:
                 error_text = FormattedText([("class:error", f"tunnel type {tunnel_type}not support!")])
-                print_formatted_text(error_text,style=shell_style)
+                print_formatted_text(error_text, style=shell_style)
                 return None
 
         intro_text = FormattedText([("class:prompt", tunnel_introduce)])
-        print_formatted_text(intro_text,style=shell_style)
-        for key,item in input_table.items():
+        print_formatted_text(intro_text, style=shell_style)
+        for key, item in input_table.items():
             user_input = await try_get_input(f"{key} : {item.desc}")
             if user_input is None:
                 return None
@@ -322,7 +320,7 @@ class AIOS_Shell:
 
         return tunnel_config
 
-    async def append_tunnel_config(self,tunnel_config):
+    async def append_tunnel_config(self, tunnel_config):
         user_data_dir = AIStorage.get_instance().get_myai_dir()
         tunnels_config_path = os.path.abspath(f"{user_data_dir}/etc/tunnels.cfg.toml")
         all_tunnels = None
@@ -336,16 +334,16 @@ class AIOS_Shell:
 
         all_tunnels[tunnel_config["tunnel_id"]] = tunnel_config
         try:
-            f = open(tunnels_config_path,"w")
+            f = open(tunnels_config_path, "w")
             if f:
-                toml.dump(all_tunnels,f)
+                toml.dump(all_tunnels, f)
                 logger.info(f"append tunnel config to {tunnels_config_path} success!")
             else:
                 logger.warning(f"append tunnel config to {tunnels_config_path} failed!")
         except Exception as e:
             logger.warning(f"append tunnels config  from {tunnels_config_path} failed! {e}")
 
-    async def handle_contact_commands(self,args):
+    async def handle_contact_commands(self, args):
         cm = ContactManager.get_instance()
         if len(args) < 1:
             return FormattedText([("class:error", f'/contact $contact_name,  Like /contact "Jim Green"')])
@@ -353,7 +351,7 @@ class AIOS_Shell:
         contact = cm.find_contact_by_name(contact_name)
         is_update = False
         if contact is not None:
-            #show old info and ask user to update or remove
+            # show old info and ask user to update or remove
             is_update = True
             op_str = await try_get_input(f"Contact {contact_name} already exist, update or remove? (u/r)")
             if op_str is None:
@@ -394,15 +392,15 @@ class AIOS_Shell:
 
         contact.added_by = self.username
         if is_update:
-            cm.set_contact(contact_name,contact)
+            cm.set_contact(contact_name, contact)
         else:
-            cm.add_contact(contact_name,contact)
+            cm.add_contact(contact_name, contact)
 
     async def handle_knowledge_commands(self, args):
         show_text = FormattedText([("class:title", "sub command not support!\n"
-                              "/knowledge pipelines\n" 
-                              "/knowledge journal $pipeline [$topn]\n"
-                              "/knowledge query $object_id\n")])
+                                                   "/knowledge pipelines\n"
+                                                   "/knowledge journal $pipeline [$topn]\n"
+                                                   "/knowledge query $object_id\n")])
         if len(args) < 1:
             return show_text
         sub_cmd = args[0]
@@ -413,10 +411,13 @@ class AIOS_Shell:
             try:
                 name = args[1]
                 topn = 10 if len(args) == 2 else int(args[2])
-                journals = [str(journal) for journal in KnowledgePipelineManager.get_instance().get_pipeline(name).get_journal().latest_journals(topn)]
+                journals = [str(journal) for journal in
+                            KnowledgePipelineManager.get_instance().get_pipeline(name).get_journal().latest_journals(
+                                topn)]
                 print_formatted_text("\r\n".join(str(journal) for journal in journals))
             except ValueError:
-                return FormattedText([("class:title", f"/knowledge journal failed: {args[1]} is not a valid integer.\n")])
+                return FormattedText(
+                    [("class:title", f"/knowledge journal failed: {args[1]} is not a valid integer.\n")])
         if sub_cmd == "query":
             if len(args) < 2:
                 return show_text
@@ -431,11 +432,11 @@ class AIOS_Shell:
                 image.show()
 
     async def handle_node_commands(self, args):
-        show_text = FormattedText([("class:title", "sub command not support!\n" 
-                              "/node add $model_name $url\n"
-                              "/node create\n"
-                              "/node rm $model_name $url\n"
-                              "/node list\n")])
+        show_text = FormattedText([("class:title", "sub command not support!\n"
+                                                   "/node add $model_name $url\n"
+                                                   "/node create\n"
+                                                   "/node rm $model_name $url\n"
+                                                   "/node list\n")])
         if len(args) < 1:
             return show_text
         sub_cmd = args[0]
@@ -463,10 +464,11 @@ class AIOS_Shell:
         elif sub_cmd == "list":
             print_formatted_text(ComputeNodeConfig.get_instance().list())
 
-    async def call_func(self,func_name, args):
+    async def call_func(self, func_name, args):
         match func_name:
             case 'send':
-                show_text = FormattedText([("class:error", f'send args error,/send Tracy "Hello! It is a good day!" default')])
+                show_text = FormattedText(
+                    [("class:error", f'send args error,/send Tracy "Hello! It is a good day!" default')])
                 sender = None
                 if len(args) == 3:
                     target_id = args[0]
@@ -479,9 +481,9 @@ class AIOS_Shell:
                     topic = args[2]
                     sender = args[3]
 
-                resp = await self.send_msg(msg_content,target_id,topic,sender)
+                resp = await self.send_msg(msg_content, target_id, topic, sender)
                 show_text = FormattedText([("class:title", f"{self.current_topic}@{self.current_target} >>> "),
-                                        ("class:content", resp)])
+                                           ("class:content", resp)])
                 return show_text
             case 'send_img':
                 sender = None
@@ -539,8 +541,10 @@ class AIOS_Shell:
                     old_value = AIStorage.get_instance().get_user_config().get_value(key)
 
                     if config_item is not None:
-                        value = await session.prompt_async(f"{key} : {config_item.desc} \nCurrent : {old_value}\nPlease input new value:",style=shell_style)
-                        AIStorage.get_instance().get_user_config().set_value(key,value)
+                        value = await session.prompt_async(
+                            f"{key} : {config_item.desc} \nCurrent : {old_value}\nPlease input new value:",
+                            style=shell_style)
+                        AIStorage.get_instance().get_user_config().set_value(key, value)
                         await AIStorage.get_instance().get_user_config().save_to_user_config()
                         show_text = FormattedText([("class:title", f"set {key} to {value} success!")])
                     else:
@@ -557,7 +561,7 @@ class AIOS_Shell:
                 else:
                     tunnel_type = args[1]
                 tunnel_type = tunnel_type.lower()
-                tunnel_config = await self.get_tunnel_config_from_input(tunnel_target,tunnel_type)
+                tunnel_config = await self.get_tunnel_config_from_input(tunnel_target, tunnel_type)
                 if tunnel_config:
                     if await AgentTunnel.load_tunnel_from_config(tunnel_config):
                         # append
@@ -585,7 +589,8 @@ class AIOS_Shell:
                 if len(args) >= 1:
                     target_id = args[0]
                 else:
-                    show_text = FormattedText([("class:error", "/open Need Target Agent/Workflow ID! like /open Jarvis default")])
+                    show_text = FormattedText(
+                        [("class:error", "/open Need Target Agent/Workflow ID! like /open Jarvis default")])
                     return show_text
 
                 if len(args) >= 2:
@@ -606,7 +611,8 @@ class AIOS_Shell:
                 self.current_target = target_id
                 self.current_topic = topic
                 show_text = FormattedText([("class:title", f"current session switch to {topic}@{target_id}")])
-                AIStorage.get_instance().get_user_config().set_value("shell.current",f"{self.current_topic}@{self.current_target}")
+                AIStorage.get_instance().get_user_config().set_value("shell.current",
+                                                                     f"{self.current_topic}@{self.current_target}")
                 await AIStorage.get_instance().get_user_config().save_to_user_config()
                 return show_text
             case 'enable':
@@ -637,7 +643,7 @@ class AIOS_Shell:
                 await AIStorage.get_instance().disable_feature(feature)
                 show_text = FormattedText([("class:title", f"Feature {feature} disabled!")])
                 return show_text
-            #case 'login':
+            # case 'login':
             #    if len(args) >= 1:
             #        self.username = args[0]
             #    AIBus().get_default_bus().register_message_handler(self.username,self._user_process_msg)
@@ -657,13 +663,15 @@ class AIOS_Shell:
                     db_path = AgentManager.get_instance().db_path
                 # else:
                 #     db_path = WorkflowManager.get_instance().db_file
-                chatsession:AIChatSession = AIChatSession.get_session(self.current_target,f"{self.username}#{self.current_topic}",db_path,False)
+                chatsession: AIChatSession = AIChatSession.get_session(self.current_target,
+                                                                       f"{self.username}#{self.current_topic}", db_path,
+                                                                       False)
                 if chatsession is not None:
-                    msgs = chatsession.read_history(num,offset)
+                    msgs = chatsession.read_history(num, offset)
                     format_texts = []
                     for msg in msgs:
-                        format_texts.append(("class:content",f"{msg.sender} >>> {msg.body}"))
-                        format_texts.append(("",f"\n-------------------\n"))
+                        format_texts.append(("class:content", f"{msg.sender} >>> {msg.body}"))
+                        format_texts.append(("", f"\n-------------------\n"))
                     return FormattedText(format_texts)
                 return FormattedText([("class:title", f"chatsession not found")])
             case 'node':
@@ -671,12 +679,14 @@ class AIOS_Shell:
             case 'exit':
                 os._exit(0)
             case 'help':
-                return FormattedText([("class:title", f"GO to https://github.com/fiatrete/OpenDAN-Personal-AI-OS/issues ^_^")])
+                return FormattedText(
+                    [("class:title", f"GO to https://github.com/fiatrete/OpenDAN-Personal-AI-OS/issues ^_^")])
 
 
 ##########################################################################################################################
 history = FileHistory('aios_shell_history.txt')
 session = PromptSession(history=history)
+
 
 def parse_function_call(func_string):
     if len(func_string) > 2:
@@ -688,8 +698,9 @@ def parse_function_call(func_string):
     else:
         return None
 
-async def try_get_input(desc:str,mutil_line:bool = False,check_func:callable = None) -> str:
-    user_input = await session.prompt_async(f"{desc} \nType /exit to abort. \nPlease input:",style=shell_style)
+
+async def try_get_input(desc: str, mutil_line: bool = False, check_func: callable = None) -> str:
+    user_input = await session.prompt_async(f"{desc} \nType /exit to abort. \nPlease input:", style=shell_style)
     err_str = ""
     if check_func is None:
         if len(user_input) > 0:
@@ -701,16 +712,17 @@ async def try_get_input(desc:str,mutil_line:bool = False,check_func:callable = N
                 return None
 
     else:
-        is_ok,err_str = check_func(user_input)
+        is_ok, err_str = check_func(user_input)
         if is_ok:
             return user_input
 
     error_text = FormattedText([("class:error", err_str)])
-    print_formatted_text(error_text,style=shell_style)
-    return await try_get_input(desc,check_func)
+    print_formatted_text(error_text, style=shell_style)
+    return await try_get_input(desc, check_func)
 
-async def get_user_config_from_input(check_result:dict) -> bool:
-    for key,item in check_result.items():
+
+async def get_user_config_from_input(check_result: dict) -> bool:
+    for key, item in check_result.items():
         user_input = await try_get_input(f"System config {key} ({item.desc}) not define!")
         if user_input is None:
             if item.is_optional:
@@ -719,26 +731,28 @@ async def get_user_config_from_input(check_result:dict) -> bool:
                 True
         if user_input:
             if len(user_input) > 0:
-                AIStorage.get_instance().get_user_config().set_value(key,user_input)
+                AIStorage.get_instance().get_user_config().set_value(key, user_input)
 
     await AIStorage.get_instance().get_user_config().save_to_user_config()
     return True
 
-async def main_daemon_loop(shell:AIOS_Shell):
+
+async def main_daemon_loop(shell: AIOS_Shell):
     while shell.is_working:
         await asyncio.sleep(1)
 
     return 0
+
 
 def print_welcome_screen():
     print("\033[1;31m")
     logo = """
 \t   _______                    ____________________   __
 \t   __  __ \______________________  __ \__    |__  | / /
-\t   _  / / /__  __ \  _ \_  __ \_  / / /_  /| |_   |/ / 
-\t   / /_/ /__  /_/ /  __/  / / /  /_/ /_  ___ |  /|  /  
-\t   \____/ _  .___/\___//_/ /_//_____/ /_/  |_/_/ |_/   
-\t           /_/                                          
+\t   _  / / /__  __ \  _ \_  __ \_  / / /_  /| |_   |/ /
+\t   / /_/ /__  /_/ /  __/  / / /  /_/ /_  ___ |  /|  /
+\t   \____/ _  .___/\___//_/ /_//_____/ /_/  |_/_/ |_/
+\t           /_/
 
     """
     print(logo)
@@ -747,19 +761,19 @@ def print_welcome_screen():
     print("\033[1;32m \t\tWelcome to OpenDAN - Your Personal AI OS\033[0m\n")
 
     introduce = """
-\tOpenDAN (Open and Do Anything Now with AI) is revolutionizing the 
-\tAI landscape with its Personal AI Operating System. Designed for 
-\tseamless integration of diverse AI modules, it ensures unmatched 
+\tOpenDAN (Open and Do Anything Now with AI) is revolutionizing the
+\tAI landscape with its Personal AI Operating System. Designed for
+\tseamless integration of diverse AI modules, it ensures unmatched
 \tinteroperability. OpenDAN empowers users to craft powerful AI agents:
 \tfrom butlers and assistants to personal tutors and digital companions.
-\tAll while retaining control. These agents can team up to tackle complex  
-\tchallenges, integrate with existing services, and command IoT devices. 
+\tAll while retaining control. These agents can team up to tackle complex
+\tchallenges, integrate with existing services, and command IoT devices.
 \t
 \tWith OpenDAN, we're putting AI in your hands, making life simpler and smarter.
 \t
 \t================ AIOS Shell Handbook ================
 
-\033[1;94m\tUnderstand the Shell Prompt :\033[0m [current_username]<->[current_topic]@[current_target]$ 
+\033[1;94m\tUnderstand the Shell Prompt :\033[0m [current_username]<->[current_topic]@[current_target]$
 \033[1;94m\tTalk with Agent/Workflow :\033[0m Directly input and wait.
 \033[1;94m\tTalk with another Agent/Workflow :\033[0m /open $target_name [$topic_name]
 \033[1;94m\tInstall new Agent/Workflow :\033[0m /install $agent_name (Not support at 0.5.1)
@@ -769,7 +783,7 @@ def print_welcome_screen():
 \033[1;94m\tChange OpenAI API Token :\033[0m /set_config $openai_api_key
 \033[1;94m\tGive your Agent a Telegram account :\033[0m /connect $agent_name
 \033[1;94m\tAdd personal files to the AI Knowledge Base. \033[0m
-\t\t1) Copy your file to ~/myai/data 
+\t\t1) Copy your file to ~/myai/data
 \033[1;94m\tSearch your knowledge base :\033[0m /open Mia
 \033[1;94m\tCheck the progress of AI reading personal data :\033[0m /knowledge $pipeline journal
 \033[1;94m\tQuery object with ID in knowledge base :\033[0m /knowledge query $object_id
@@ -795,9 +809,8 @@ async def main():
     else:
         AIStorage.get_instance().is_dev_mode = False
 
-
     if AIStorage.get_instance().is_dev_mode:
-        logging.basicConfig(filename="aios_shell.log",filemode="w",encoding='utf-8',force=True,
+        logging.basicConfig(filename="aios_shell.log", filemode="w", encoding='utf-8', force=True,
                             level=logging.INFO,
                             format='[%(asctime)s]%(name)s[%(levelname)s]: %(message)s')
     else:
@@ -805,7 +818,7 @@ async def main():
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         log_file = f"{AIStorage.get_instance().get_myai_dir()}/logs/aios.log"
-        handler = RotatingFileHandler(log_file, maxBytes=50*1024*1024, backupCount=100)
+        handler = RotatingFileHandler(log_file, maxBytes=50 * 1024 * 1024, backupCount=100)
 
         logging.basicConfig(handlers=[handler],
                             level=logging.INFO,
@@ -825,7 +838,7 @@ async def main():
             logger.error(check_result)
             return 1
         else:
-            #Remind users to enter necessary configurations.
+            # Remind users to enter necessary configurations.
             if await get_user_config_from_input(check_result) is False:
                 return 1
     shell.username = AIStorage.get_instance().get_user_config().get_value("username")
@@ -873,7 +886,8 @@ async def main():
 
     await asyncio.sleep(0.2)
     while True:
-        user_input = await session.prompt_async(f"{shell.username}<->{shell.current_topic}@{shell.current_target}$ ",completer=completer,style=shell_style)
+        user_input = await session.prompt_async(f"{shell.username}<->{shell.current_topic}@{shell.current_target}$ ",
+                                                completer=completer, style=shell_style)
         if len(user_input) <= 1:
             continue
 
@@ -882,16 +896,15 @@ async def main():
         if func_call:
             show_text = await shell.call_func(func_call[0], func_call[1])
         else:
-            resp = await shell.send_msg(user_input,shell.current_target,shell.current_topic,shell.username)
+            resp = await shell.send_msg(user_input, shell.current_target, shell.current_topic, shell.username)
             show_text = FormattedText([
                 ("class:title", f"{shell.current_topic}@{shell.current_target} >>> "),
                 ("class:content", resp)
             ])
 
-        print_formatted_text(show_text,style=shell_style)
-        #print_formatted_text(f"{shell.username}<->{shell.current_topic}@{shell.current_target} >>> {resp}",style=shell_style)
+        print_formatted_text(show_text, style=shell_style)
+        # print_formatted_text(f"{shell.username}<->{shell.current_topic}@{shell.current_target} >>> {resp}",style=shell_style)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-

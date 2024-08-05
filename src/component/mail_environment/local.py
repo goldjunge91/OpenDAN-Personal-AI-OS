@@ -7,7 +7,7 @@ from .mail import Mail, MailStorage
 
 
 class LocalEmail:
-    def __init__(self, env: KnowledgePipelineEnvironment, config:dict): 
+    def __init__(self, env: KnowledgePipelineEnvironment, config: dict):
         self.config = config
         self.env = env
         path = string.Template(config["path"]).substitute(myai_dir=AIStorage.get_instance().get_myai_dir())
@@ -23,7 +23,7 @@ class LocalEmail:
                     yield None
                     continue
                 parsed = latest_journal.get_input()
-            
+
             mail_id = self.mail_storage.next_mail_id(parsed)
             if mail_id is None:
                 yield (None, None)
@@ -32,5 +32,5 @@ class LocalEmail:
 
 
 class LocalEmailWithFilter:
-    def __init__(self, env: KnowledgePipelineEnvironment, config:dict):
+    def __init__(self, env: KnowledgePipelineEnvironment, config: dict):
         pass

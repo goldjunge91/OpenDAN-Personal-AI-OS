@@ -27,7 +27,7 @@ def abs_diff(pre_image, curr_image):
     gray_pre_image = precess_image(pre_image)
     gray_curr_image = precess_image(curr_image)
     diff = cv2.absdiff(gray_pre_image, gray_curr_image)
-    res, diff = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    res, diff = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     cnt_diff = np.sum(np.sum(diff))
     return cnt_diff
 
